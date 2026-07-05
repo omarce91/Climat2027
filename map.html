@@ -2,16 +2,67 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Carte des communes sinistrées — #Climat2027</title>
+<title>Communes sinistrées — #Climat2027</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
   html, body, #map { height: 100%; margin: 0; }
+
   .info-banner {
     position: absolute; top: 10px; left: 50px; z-index: 1000;
     background: white; padding: 8px 14px; border-radius: 6px;
     box-shadow: 0 1px 4px rgba(0,0,0,.3);
     font-family: system-ui, sans-serif; font-size: 14px;
+  }
+
+  .legend {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 1px 5px rgba(0,0,0,.35);
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    max-width: 250px;
+    line-height: 1.5;
+  }
+  .legend h4 {
+    margin: 0 0 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a1a1a;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 6px;
+  }
+  .legend-item { display: flex; align-items: center; margin: 5px 0; }
+  .legend-dot {
+    width: 13px; height: 13px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,.2);
+    margin-right: 8px; flex-shrink: 0;
+  }
+  .legend-sep { border: none; border-top: 1px solid #eee; margin: 8px 0; }
+  .legend-latest { font-size: 12px; color: #333; margin-top: 4px; }
+  .legend-latest strong { display: block; font-size: 13px; color: #111; margin-bottom: 2px; }
+  .legend-latest em { font-style: normal; color: #555; }
+
+  /* Pulsation du dernier marqueur via div icon */
+  .pulse-ring {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 3px solid #FFD700;
+    animation: pulse-anim 2s ease-out infinite;
+    position: absolute;
+    top: -5px; left: -5px;
+  }
+  @keyframes pulse-anim {
+    0%   { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(2);   opacity: 0; }
+  }
+  .latest-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 3px solid #FFD700;
+    position: relative;
   }
 </style>
 </head>
@@ -21,51 +72,120 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
+  // ── Fond de carte IGN Plan V2 (gratuit, sans token) ───────────────
   const map = L.map('map');
-
-  // Fond de carte IGN Plan V2 — gratuit, sans token, souverain
-  // Source : Géoplateforme IGN (cartes.gouv.fr)
   L.tileLayer(
     'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0' +
     '&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&TILEMATRIXSET=PM' +
     '&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/png&STYLE=normal',
     {
-      attribution: '&copy; <a href="https://www.ign.fr/">IGN</a> — <a href="https://cartes.gouv.fr/">Géoplateforme</a>',
-      maxZoom: 19,
-      minZoom: 2,
+      attribution: '&copy; <a href="https://www.ign.fr/">IGN</a> — ' +
+                   '<a href="https://cartes.gouv.fr/">Géoplateforme</a>',
+      maxZoom: 19, minZoom: 2,
     }
   ).addTo(map);
 
-  const params = new URLSearchParams(window.location.search);
-  const focusLat = parseFloat(params.get('lat'));
-  const focusLon = parseFloat(params.get('lon'));
+  // ── Couleurs et libellés par type de sinistre ─────────────────────
+  const TYPES = [
+    { keys: ['sécheresse', 'secheresse', 'rga'], color: '#E65100', label: 'Sécheresse / RGA' },
+    { keys: ['inondation', 'coulée', 'coulee'],  color: '#1565C0', label: 'Inondations / coulées' },
+    { keys: ['nappe'],                            color: '#00838F', label: 'Remontée de nappe' },
+    { keys: ['avalanche'],                        color: '#7B1FA2', label: 'Avalanche' },
+  ];
+  const DEFAULT = { color: '#546E7A', label: 'Autre' };
+
+  function typeInfo(typeStr) {
+    const t = (typeStr || '').toLowerCase();
+    for (const def of TYPES) {
+      if (def.keys.some(k => t.includes(k))) return def;
+    }
+    return DEFAULT;
+  }
+
+  // ── Légende ───────────────────────────────────────────────────────
+  const legend = L.control({ position: 'bottomright' });
+  legend.onAdd = function () {
+    const div = L.DomUtil.create('div', 'legend');
+    const rows = TYPES.map(d =>
+      `<div class="legend-item">
+         <span class="legend-dot" style="background:${d.color}"></span>${d.label}
+       </div>`
+    ).join('');
+    div.innerHTML =
+      `<h4>#1Jour1CommuneSinistree</h4>` + rows +
+      `<hr class="legend-sep">` +
+      `<div class="legend-latest" id="legend-latest">Aucune commune chargée.</div>`;
+    return div;
+  };
+  legend.addTo(map);
+
+  // ── Paramètres d'URL (?lat=…&lon=…&zoom=…) ───────────────────────
+  const params    = new URLSearchParams(window.location.search);
+  const focusLat  = parseFloat(params.get('lat'));
+  const focusLon  = parseFloat(params.get('lon'));
   const focusZoom = parseFloat(params.get('zoom')) || 13;
 
-  fetch('markers.json?t=' + Date.now()) // évite le cache navigateur
+  // ── Chargement des marqueurs ──────────────────────────────────────
+  fetch('markers.json?t=' + Date.now())
     .then(r => r.json())
     .then(markers => {
       document.getElementById('counter').textContent =
         markers.length + ' commune(s) sinistrée(s) recensée(s) — #Climat2027';
 
       const placed = [];
-      markers.forEach(m => {
-        const marker = L.marker([m.lat, m.lon]).addTo(map);
+
+      markers.forEach((m, i) => {
+        const isLatest = (i === markers.length - 1);
+        const info     = typeInfo(m.type);
+
+        let marker;
+
+        if (isLatest) {
+          // Marqueur spécial pour la dernière commune : DivIcon avec anneau pulsant
+          const icon = L.divIcon({
+            className: '',
+            html: `<div class="latest-icon" style="background:${info.color}">
+                     <div class="pulse-ring"></div>
+                   </div>`,
+            iconSize:   [20, 20],
+            iconAnchor: [10, 10],
+            popupAnchor: [0, -12],
+          });
+          marker = L.marker([m.lat, m.lon], { icon }).addTo(map);
+        } else {
+          marker = L.circleMarker([m.lat, m.lon], {
+            radius:      8,
+            fillColor:   info.color,
+            color:       '#fff',
+            weight:      1.5,
+            opacity:     1,
+            fillOpacity: 0.85,
+          }).addTo(map);
+        }
+
         marker.bindPopup(
           `<b>${m.commune}</b> (${m.departement})<br>` +
-          `${m.type}<br>` +
+          `<span style="color:${info.color}">●</span> ${info.label}<br>` +
           (m.day ? `Jour ${m.day} — ` : '') + (m.date || '')
         );
+
         placed.push(marker);
+
+        if (isLatest) {
+          document.getElementById('legend-latest').innerHTML =
+            `<strong>Dernier ajout${m.day ? ' (Jour ' + m.day + ')' : ''}</strong>` +
+            `${m.commune} (${m.departement})<br>` +
+            `<em style="color:${info.color}">● ${info.label}</em><br>` +
+            `<em>${m.date || ''}</em>`;
+        }
       });
 
+      // Centrage
       if (!isNaN(focusLat) && !isNaN(focusLon)) {
-        // Zoom sur le point demandé dans l'URL (ex: lien d'un post du jour)
         map.setView([focusLat, focusLon], focusZoom);
       } else if (placed.length > 0) {
-        // Pas de point précisé : on cadre sur tous les marqueurs
         map.fitBounds(L.featureGroup(placed).getBounds().pad(0.2));
       } else {
-        // Aucun marqueur encore : vue par défaut centrée sur la France
         map.setView([46.6, 2.5], 6);
       }
     })
