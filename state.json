@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 {
   "next_index": 14,
   "last_posted_date": "2026-07-05",
@@ -74,3 +75,6 @@
     }
   ]
 }
+=======
+{"next_index": 13, "last_posted_date": null, "posted_log": []}
+>>>>>>> Stashed changes
