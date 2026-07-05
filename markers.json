@@ -1,1 +1,56 @@
-[]
+[
+  {
+    "commune": "Genillé",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 9,
+    "date": "2026-06-30",
+    "lat": 47.1809,
+    "lon": 1.1134
+  },
+  {
+    "commune": "Pleucadeuc",
+    "departement": "Morbihan",
+    "type": "inondations et coulées de boue",
+    "day": 10,
+    "date": "2026-07-01",
+    "lat": 47.7722,
+    "lon": -2.3918
+  },
+  {
+    "commune": "Thilouze",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 11,
+    "date": "2026-07-02",
+    "lat": 47.2204,
+    "lon": 0.6039
+  },
+  {
+    "commune": "Xaintrailles",
+    "departement": "Lot-et-Garonne",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 12,
+    "date": "2026-07-03",
+    "lat": 44.2077,
+    "lon": 0.2547
+  },
+  {
+    "commune": "Pralognan-la-Vanoise",
+    "departement": "Savoie",
+    "type": "avalanche",
+    "day": 13,
+    "date": "2026-07-04",
+    "lat": 45.3431,
+    "lon": 6.7305
+  },
+  {
+    "commune": "Trouy",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 14,
+    "date": "2026-07-05",
+    "lat": 47.0273,
+    "lon": 2.3618
+  }
+]
