@@ -44,6 +44,7 @@ Usage
 """
 
 import argparse
+import io
 import json
 import random
 import re
@@ -65,7 +66,7 @@ BASE_WEIGHT          = 3       # poids plancher pour les messages sans score
 # Authentification (commun à tous les modes)
 # ─────────────────────────────────────────────────────────────────────
 
-def load_credentials(config_file: Path) -> tuple[str, str]:
+def load_credentials(config_file: Path) -> tuple[str, str, str | None]:
     if not config_file.exists():
         sys.exit(
             f"Fichier d'identifiants introuvable : {config_file}\n"
@@ -80,7 +81,8 @@ def load_credentials(config_file: Path) -> tuple[str, str]:
     app_password = data.get("app_password")
     if not handle or not app_password:
         sys.exit("credentials.json doit contenir 'handle' et 'app_password'.")
-    return handle, app_password
+    map_url = data.get("map_url") or None
+    return handle, app_password, map_url
 
 
 def build_richtext(client_utils, text: str):
@@ -168,7 +170,68 @@ def _geocode_commune(commune: str, departement: str) -> tuple[float, float] | No
     return None
 
 
-def run_commune_mode(args, client, client_utils) -> None:
+# Correspondance type sinistre → couleur (identique à map.html)
+# ⚠️ L'ordre compte : 'nappe' doit être testé avant 'inondation' car
+# "inondation par remontée de nappe" contient les deux mots.
+_TYPE_COLORS = [
+    (['sécheresse', 'secheresse', 'rga'], '#E65100'),
+    (['nappe'],                            '#00838F'),
+    (['inondation', 'coulée', 'coulee'],  '#1565C0'),
+    (['avalanche'],                        '#7B1FA2'),
+]
+_DEFAULT_COLOR = '#546E7A'
+
+
+def _marker_color(type_str: str) -> str:
+    t = (type_str or '').lower()
+    for keys, color in _TYPE_COLORS:
+        if any(k in t for k in keys):
+            return color
+    return _DEFAULT_COLOR
+
+
+def generate_map_thumbnail(markers: list[dict],
+                           width: int = 600, height: int = 380) -> bytes | None:
+    """Génère une image PNG de la carte avec tous les marqueurs colorés.
+    Utilise staticmap + tuiles OpenStreetMap (aucun token requis).
+    Retourne None si la génération échoue (le post part quand même sans image)."""
+    try:
+        from staticmap import StaticMap, CircleMarker
+    except ImportError:
+        print("  [carte] 'staticmap' non installé — pip install staticmap")
+        return None
+    try:
+        m = StaticMap(
+            width, height,
+            url_template='https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            headers={
+                'User-Agent':
+                    'Climat2027-bot/1.0 (+https://github.com/omarce91/Climat2027)'
+            }
+        )
+        for i, marker in enumerate(markers):
+            is_latest = (i == len(markers) - 1)
+            color = _marker_color(marker.get('type', ''))
+            coord = (marker['lon'], marker['lat'])
+            if is_latest:
+                m.add_marker(CircleMarker(coord, 'white', 24))   # halo blanc
+                m.add_marker(CircleMarker(coord, '#FFD700', 20)) # anneau doré
+                m.add_marker(CircleMarker(coord, color,   14))   # cercle coloré
+            else:
+                m.add_marker(CircleMarker(coord, 'white', 12))
+                m.add_marker(CircleMarker(coord, color,   9))
+        image = m.render()
+        buf = io.BytesIO()
+        image.save(buf, format='PNG', optimize=True)
+        data = buf.getvalue()
+        print(f"  [carte] Miniature générée ({len(data)//1024} Ko).")
+        return data
+    except Exception as e:
+        print(f"  [carte] Impossible de générer la miniature : {e}")
+        return None
+
+
+def run_commune_mode(args, client, client_utils, models, map_url: str | None = None) -> None:
     posts_file   = Path(args.commune_posts_file)
     state_file   = Path(args.commune_state_file)
     markers_file = Path(args.markers_file)
@@ -196,35 +259,83 @@ def run_commune_mode(args, client, client_utils) -> None:
     if len(post_text) > MAX_POST_LENGTH:
         sys.exit(f"Post #{next_index + 1} trop long ({len(post_text)} car.). Corrige posts.md.")
 
+    # Géocodage EN AMONT pour pouvoir construire le lien carte
+    fields = _parse_commune_fields(post_text)
+    coords = None
+    if fields:
+        print(f"Géocodage de {fields['commune']} ({fields['departement']})...")
+        coords = _geocode_commune(fields["commune"], fields["departement"])
+        if coords:
+            print(f"  → {coords[0]:.5f}, {coords[1]:.5f}")
+        else:
+            print("  → échec du géocodage.")
+
     print(f"--- #1Jour1CommuneSinistree #{next_index + 1}/{len(posts)} ({today}) ---")
     print(post_text)
+    if coords and map_url:
+        lat, lon = coords
+        link = f"{map_url.rstrip('/')}/?lat={lat:.4f}&lon={lon:.4f}&zoom=13"
+        print(f"[Lien carte : {link}]")
     print("-" * 50)
 
     if args.dry_run:
         print("[dry-run] Rien n'a été envoyé.")
         return
 
-    richtext = build_richtext(client_utils, post_text)
-    result = client.send_post(richtext)
+    # ── Prépare la liste des marqueurs incluant le nouveau ────────────
+    existing_markers = _load_markers(markers_file)
+    new_marker = None
+    if fields and coords:
+        lat, lon = coords
+        new_marker = {**fields, "date": today, "lat": lat, "lon": lon}
+    updated_markers = existing_markers + ([new_marker] if new_marker else [])
 
-    state["next_index"] = next_index + 1
-    state["last_posted_date"] = today
+    # ── Génère la miniature de la carte ───────────────────────────────
+    thumbnail = None
+    if updated_markers:
+        print("Génération de la miniature de carte...")
+        thumbnail = generate_map_thumbnail(updated_markers)
+
+    # ── Envoi du post principal (avec ou sans miniature) ──────────────
+    richtext = build_richtext(client_utils, post_text)
+    if thumbnail:
+        alt = (f"Carte des communes sinistrées par catastrophe naturelle — "
+               f"{fields['commune']} ({fields['departement']}) mis en évidence"
+               if fields else "Carte des communes sinistrées")
+        result = client.send_image(text=richtext, image=thumbnail, image_alt=alt)
+        print("Miniature jointe au post.")
+    else:
+        result = client.send_post(richtext)
+
+    state["next_index"]        = next_index + 1
+    state["last_posted_date"]  = today
     state["posted_log"].append({"index": next_index, "date": today, "uri": result.uri})
     _save_commune_state(state_file, state)
     print(f"Posté : {result.uri}")
 
-    # Mise à jour carte (best-effort : ne bloque jamais l'envoi)
-    fields = _parse_commune_fields(post_text)
-    if fields:
-        coords = _geocode_commune(fields["commune"], fields["departement"])
-        if coords:
-            lat, lon = coords
-            markers = _load_markers(markers_file)
-            markers.append({**fields, "date": today, "lat": lat, "lon": lon})
-            _save_markers(markers_file, markers)
-            print(f"Carte : marqueur ajouté pour {fields['commune']} ({lat:.5f}, {lon:.5f})")
-        else:
-            print(f"Géocodage échoué pour {fields['commune']} — pas de marqueur.")
+    # ── Réponse avec lien carte (best-effort, ne bloque jamais) ──────
+    if coords and map_url:
+        lat, lon = coords
+        link       = f"{map_url.rstrip('/')}/?lat={lat:.4f}&lon={lon:.4f}&zoom=13"
+        reply_text = f"📍 Voir {fields['commune']} sur la carte des communes sinistrées #Climat2027\n{link}"
+        try:
+            parent_ref = models.ComAtprotoRepoStrongRef.Main(
+                uri=result.uri, cid=result.cid)
+            reply_to   = models.AppBskyFeedPost.ReplyRef(
+                root=parent_ref, parent=parent_ref)
+            client.send_post(
+                text=build_richtext(client_utils, reply_text),
+                reply_to=reply_to)
+            print(f"Lien carte posté en réponse.")
+        except Exception as e:
+            print(f"Impossible de poster le lien carte ({e}).")
+
+    # ── Mise à jour de markers.json ───────────────────────────────────
+    if new_marker:
+        _save_markers(markers_file, updated_markers)
+        print(f"Carte : marqueur ajouté pour {fields['commune']} ({coords[0]:.5f}, {coords[1]:.5f})")
+    elif fields:
+        print(f"Géocodage échoué pour {fields['commune']} — pas de marqueur.")
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -505,6 +616,9 @@ def main():
     grp_c.add_argument("--commune-posts-file",  default="posts.md")
     grp_c.add_argument("--commune-state-file",  default="state.json")
     grp_c.add_argument("--markers-file",        default="markers.json")
+    grp_c.add_argument("--map-url",             default=None,
+                       help="URL de base de la carte (ex: https://compte.github.io/repo/). "
+                            "Si absent, lu depuis credentials.json (champ 'map_url').")
     grp_c.add_argument("--force", action="store_true",
                        help="Ignore la limite 1 post/jour")
 
@@ -530,7 +644,8 @@ def main():
 
     # ── Mode all : commune + stats + reply ───────────────────────────
     if args.mode == "all":
-        handle, app_password = load_credentials(Path(args.config))
+        handle, app_password, cred_map_url = load_credentials(Path(args.config))
+        map_url = args.map_url or cred_map_url
         try:
             from atproto import Client, client_utils, models
         except ImportError:
@@ -541,7 +656,7 @@ def main():
         print("═" * 50)
         print("1/3 — Post #1Jour1CommuneSinistree")
         print("═" * 50)
-        run_commune_mode(args, client, client_utils)
+        run_commune_mode(args, client, client_utils, models, map_url)
 
         for f in [Path(args.humor_posts_file), Path(args.slogan_file)]:
             if not f.exists():
@@ -573,14 +688,15 @@ def main():
 
     # ── Mode commune seul ─────────────────────────────────────────────
     if args.mode == "commune":
-        handle, app_password = load_credentials(Path(args.config))
+        handle, app_password, cred_map_url = load_credentials(Path(args.config))
+        map_url = args.map_url or cred_map_url
         try:
-            from atproto import Client, client_utils
+            from atproto import Client, client_utils, models
         except ImportError:
             sys.exit("pip install atproto")
         client = Client()
         client.login(handle, app_password)
-        run_commune_mode(args, client, client_utils)
+        run_commune_mode(args, client, client_utils, models, map_url)
         return
 
     # ── Modes post / reply / stats-only ──────────────────────────────
@@ -593,7 +709,7 @@ def main():
     if not posts:
         sys.exit(f"Aucun message trouvé dans {args.humor_posts_file}.")
 
-    handle, app_password = load_credentials(Path(args.config))
+    handle, app_password, _ = load_credentials(Path(args.config))
     try:
         from atproto import Client, client_utils, models
     except ImportError:

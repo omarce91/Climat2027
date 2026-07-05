@@ -85,11 +85,12 @@
     }
   ).addTo(map);
 
-  // ── Couleurs et libellés par type de sinistre ─────────────────────
+  // ⚠️ L'ordre compte : 'nappe' avant 'inondation' car
+  // "inondation par remontée de nappe" contient les deux mots.
   const TYPES = [
     { keys: ['sécheresse', 'secheresse', 'rga'], color: '#E65100', label: 'Sécheresse / RGA' },
-    { keys: ['inondation', 'coulée', 'coulee'],  color: '#1565C0', label: 'Inondations / coulées' },
     { keys: ['nappe'],                            color: '#00838F', label: 'Remontée de nappe' },
+    { keys: ['inondation', 'coulée', 'coulee'],  color: '#1565C0', label: 'Inondations / coulées' },
     { keys: ['avalanche'],                        color: '#7B1FA2', label: 'Avalanche' },
   ];
   const DEFAULT = { color: '#546E7A', label: 'Autre' };
