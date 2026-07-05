@@ -1,5 +1,77 @@
 [
   {
+    "commune": "Amigny-Rouy",
+    "departement": "Aisne",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 1,
+    "date": "2026-06-20",
+    "lat": 49.6111,
+    "lon": 3.3059
+  },
+  {
+    "commune": "Larçay",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 2,
+    "date": "2026-06-21",
+    "lat": 47.3515,
+    "lon": 0.7773
+  },
+  {
+    "commune": "Hoffen",
+    "departement": "Bas-Rhin",
+    "type": "inondations et coulées de boue",
+    "day": 3,
+    "date": "2026-06-22",
+    "lat": 48.93,
+    "lon": 7.9278
+  },
+  {
+    "commune": "La Couture",
+    "departement": "Pas-de-Calais",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 4,
+    "date": "2026-06-23",
+    "lat": 50.5773,
+    "lon": 2.6969
+  },
+  {
+    "commune": "Autheuil-Authouillet",
+    "departement": "Eure",
+    "type": "inondation par remontée de nappe phréatique",
+    "day": 5,
+    "date": "2026-06-24",
+    "lat": 49.1022,
+    "lon": 1.2938
+  },
+  {
+    "commune": "Hersin-Coupigny",
+    "departement": "Pas-de-Calais",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 6,
+    "date": "2026-06-27",
+    "lat": 50.4449,
+    "lon": 2.6433
+  },
+  {
+    "commune": "Beugin",
+    "departement": "Pas-de-Calais",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 7,
+    "date": "2026-06-28",
+    "lat": 50.4415,
+    "lon": 2.5077
+  },
+  {
+    "commune": "Pontours",
+    "departement": "Dordogne",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 8,
+    "date": "2026-06-29",
+    "lat": 44.8264,
+    "lon": 0.7724
+  },
+  {
     "commune": "Genillé",
     "departement": "Indre-et-Loire",
     "type": "sécheresse / réhydratation des sols (RGA)",

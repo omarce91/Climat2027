@@ -1,80 +1,20 @@
-<<<<<<< Updated upstream
 {
   "next_index": 14,
   "last_posted_date": "2026-07-05",
   "posted_log": [
-    {
-      "index": 0,
-      "date": "2026-06-20",
-      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3moqmyed5fi2b"
-    },
-    {
-      "index": 1,
-      "date": "2026-06-21",
-      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mosbbpovip2c"
-    },
-    {
-      "index": 2,
-      "date": "2026-06-22",
-      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3moul5qvv5u2n"
-    },
-    {
-      "index": 3,
-      "date": "2026-06-23",
-      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mox7g3kgs424"
-    },
-    {
-      "index": 4,
-      "date": "2026-06-24",
-      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mozjb7obqn2g"
-    },
-    {
-      "index": 5,
-      "date": "2026-06-27",
-      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpbajyb2vl2g"
-    },
-    {
-      "index": 6,
-      "date": "2026-06-28",
-      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpdow4winy2d"
-    },
-    {
-      "index": 7,
-      "date": "2026-06-29",
-      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpgfrw6r3j23"
-    },
-    {
-      "index": 8,
-      "date": "2026-06-30",
-      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpigrpcaa52x"
-    },
-    {
-      "index": 9,
-      "date": "2026-07-01",
-      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpl3vzgiaw2r"
-    },
-    {
-      "index": 10,
-      "date": "2026-07-02",
-      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpnmxe26fy2s"
-    },
-    {
-      "index": 11,
-      "date": "2026-07-03",
-      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpqccasdx42c"
-    },
-    {
-      "index": 12,
-      "date": "2026-07-04",
-      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpsrrevqwn2h"
-    },
-    {
-      "index": 13,
-      "date": "2026-07-05",
-      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpw2apk3vz2v"
-    }
+    {"index": 0,  "date": "2026-06-20", "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3moqmyed5fi2b"},
+    {"index": 1,  "date": "2026-06-21", "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mosbbpovip2c"},
+    {"index": 2,  "date": "2026-06-22", "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3moul5qvv5u2n"},
+    {"index": 3,  "date": "2026-06-23", "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mox7g3kgs424"},
+    {"index": 4,  "date": "2026-06-24", "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mozjb7obqn2g"},
+    {"index": 5,  "date": "2026-06-27", "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpbajyb2vl2g"},
+    {"index": 6,  "date": "2026-06-28", "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpdow4winy2d"},
+    {"index": 7,  "date": "2026-06-29", "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpgfrw6r3j23"},
+    {"index": 8,  "date": "2026-06-30", "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpigrpcaa52x"},
+    {"index": 9,  "date": "2026-07-01", "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpl3vzgiaw2r"},
+    {"index": 10, "date": "2026-07-02", "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpnmxe26fy2s"},
+    {"index": 11, "date": "2026-07-03", "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpqccasdx42c"},
+    {"index": 12, "date": "2026-07-04", "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpsrrevqwn2h"},
+    {"index": 13, "date": "2026-07-05", "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mpw2apk3vz2v"}
   ]
 }
-=======
-{"next_index": 13, "last_posted_date": null, "posted_log": []}
->>>>>>> Stashed changes
