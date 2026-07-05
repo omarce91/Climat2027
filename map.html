@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Carte des communes sinistrées — #Climat2027</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  html, body, #map { height: 100%; margin: 0; }
+  .info-banner {
+    position: absolute; top: 10px; left: 50px; z-index: 1000;
+    background: white; padding: 8px 14px; border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.3);
+    font-family: system-ui, sans-serif; font-size: 14px;
+  }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div class="info-banner" id="counter">Chargement…</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const map = L.map('map');
+
+  // Fond de carte IGN Plan V2 — gratuit, sans token, souverain
+  // Source : Géoplateforme IGN (cartes.gouv.fr)
+  L.tileLayer(
+    'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0' +
+    '&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&TILEMATRIXSET=PM' +
+    '&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/png&STYLE=normal',
+    {
+      attribution: '&copy; <a href="https://www.ign.fr/">IGN</a> — <a href="https://cartes.gouv.fr/">Géoplateforme</a>',
+      maxZoom: 19,
+      minZoom: 2,
+    }
+  ).addTo(map);
+
+  const params = new URLSearchParams(window.location.search);
+  const focusLat = parseFloat(params.get('lat'));
+  const focusLon = parseFloat(params.get('lon'));
+  const focusZoom = parseFloat(params.get('zoom')) || 13;
+
+  fetch('markers.json?t=' + Date.now()) // évite le cache navigateur
+    .then(r => r.json())
+    .then(markers => {
+      document.getElementById('counter').textContent =
+        markers.length + ' commune(s) sinistrée(s) recensée(s) — #Climat2027';
+
+      const placed = [];
+      markers.forEach(m => {
+        const marker = L.marker([m.lat, m.lon]).addTo(map);
+        marker.bindPopup(
+          `<b>${m.commune}</b> (${m.departement})<br>` +
+          `${m.type}<br>` +
+          (m.day ? `Jour ${m.day} — ` : '') + (m.date || '')
+        );
+        placed.push(marker);
+      });
+
+      if (!isNaN(focusLat) && !isNaN(focusLon)) {
+        // Zoom sur le point demandé dans l'URL (ex: lien d'un post du jour)
+        map.setView([focusLat, focusLon], focusZoom);
+      } else if (placed.length > 0) {
+        // Pas de point précisé : on cadre sur tous les marqueurs
+        map.fitBounds(L.featureGroup(placed).getBounds().pad(0.2));
+      } else {
+        // Aucun marqueur encore : vue par défaut centrée sur la France
+        map.setView([46.6, 2.5], 6);
+      }
+    })
+    .catch(() => {
+      document.getElementById('counter').textContent = "Impossible de charger les données.";
+      map.setView([46.6, 2.5], 6);
+    });
+</script>
+</body>
+</html>
