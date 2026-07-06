@@ -1,0 +1,46 @@
+name: Climat2027 — post quotidien
+
+on:
+  schedule:
+    - cron: '0 8 * * *'   # tous les jours à 8h UTC (10h heure de Paris)
+  workflow_dispatch:        # permet de lancer manuellement depuis Actions
+
+permissions:
+  contents: write   # nécessaire pour commiter state.json, markers.json, etc.
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupère le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installe Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Installe les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Crée credentials.json depuis les secrets GitHub
+        run: |
+          cat > credentials.json << CREDS
+          {
+            "handle": "${{ secrets.BSKY_HANDLE }}",
+            "app_password": "${{ secrets.BSKY_APP_PASSWORD }}"
+          }
+          CREDS
+
+      - name: Lance le script principal
+        run: python climat2027.py --map-url "${{ vars.MAP_URL || 'https://omarce91.github.io/Climat2027/' }}"
+
+      - name: Sauvegarde les fichiers d'état et la carte
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add state.json markers.json humor_state.json \
+                  humor_reply_state.json humor_stats.json
+          git diff --cached --quiet || \
+            git commit -m "Post automatique $(date +%F)"
+          git push
