@@ -124,5 +124,14 @@
     "date": "2026-07-05",
     "lat": 47.0273,
     "lon": 2.3618
+  },
+  {
+    "commune": "Sarlat-la-Canéda",
+    "departement": "Dordogne",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 15,
+    "date": "2026-07-06",
+    "lat": 44.906,
+    "lon": 1.1994
   }
 ]
