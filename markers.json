@@ -133,5 +133,14 @@
     "date": "2026-07-06",
     "lat": 44.906,
     "lon": 1.1994
+  },
+  {
+    "commune": "Veigné",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 16,
+    "date": "2026-07-07",
+    "lat": 47.286,
+    "lon": 0.7243
   }
 ]
