@@ -142,5 +142,14 @@
     "date": "2026-07-07",
     "lat": 47.286,
     "lon": 0.7243
+  },
+  {
+    "commune": "Laà-Mondrans",
+    "departement": "Pyrénées-Atlantiques",
+    "type": "inondations et coulées de boue",
+    "day": 17,
+    "date": "2026-07-08",
+    "lat": 43.4563,
+    "lon": -0.7698
   }
 ]
