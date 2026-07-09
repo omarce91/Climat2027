@@ -151,5 +151,14 @@
     "date": "2026-07-08",
     "lat": 43.4563,
     "lon": -0.7698
+  },
+  {
+    "commune": "Thaumiers",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 18,
+    "date": "2026-07-09",
+    "lat": 46.8185,
+    "lon": 2.6625
   }
 ]
