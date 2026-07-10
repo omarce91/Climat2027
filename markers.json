@@ -160,5 +160,14 @@
     "date": "2026-07-09",
     "lat": 46.8185,
     "lon": 2.6625
+  },
+  {
+    "commune": "Fieux",
+    "departement": "Lot-et-Garonne",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 19,
+    "date": "2026-07-10",
+    "lat": 44.1009,
+    "lon": 0.4184
   }
 ]
