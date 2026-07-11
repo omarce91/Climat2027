@@ -169,5 +169,14 @@
     "date": "2026-07-10",
     "lat": 44.1009,
     "lon": 0.4184
+  },
+  {
+    "commune": "Verneuil-sur-Vienne",
+    "departement": "Haute-Vienne",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 20,
+    "date": "2026-07-11",
+    "lat": 45.8481,
+    "lon": 1.1215
   }
 ]
