@@ -178,5 +178,14 @@
     "date": "2026-07-11",
     "lat": 45.8481,
     "lon": 1.1215
+  },
+  {
+    "commune": "Cussay",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 21,
+    "date": "2026-07-12",
+    "lat": 47.019,
+    "lon": 0.7696
   }
 ]
