@@ -196,5 +196,14 @@
     "date": "2026-07-13",
     "lat": 48.2464,
     "lon": -2.0057
+  },
+  {
+    "commune": "Augy-sur-Aubois",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 23,
+    "date": "2026-07-14",
+    "lat": 46.7788,
+    "lon": 2.8591
   }
 ]
