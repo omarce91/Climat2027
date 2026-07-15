@@ -205,5 +205,14 @@
     "date": "2026-07-14",
     "lat": 46.7788,
     "lon": 2.8591
+  },
+  {
+    "commune": "Givenchy-lès-la-Bassée",
+    "departement": "Pas-de-Calais",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 24,
+    "date": "2026-07-15",
+    "lat": 50.5348,
+    "lon": 2.7628
   }
 ]
