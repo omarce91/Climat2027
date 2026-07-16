@@ -214,5 +214,14 @@
     "date": "2026-07-15",
     "lat": 50.5348,
     "lon": 2.7628
+  },
+  {
+    "commune": "Torteron",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 25,
+    "date": "2026-07-16",
+    "lat": 47.009,
+    "lon": 2.9883
   }
 ]
