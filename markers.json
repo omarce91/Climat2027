@@ -223,5 +223,14 @@
     "date": "2026-07-16",
     "lat": 47.009,
     "lon": 2.9883
+  },
+  {
+    "commune": "Farges-en-Septaine",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 27,
+    "date": "2026-07-18",
+    "lat": 47.0682,
+    "lon": 2.639
   }
 ]
