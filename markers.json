@@ -232,5 +232,14 @@
     "date": "2026-07-18",
     "lat": 47.0682,
     "lon": 2.639
+  },
+  {
+    "commune": "Campsegret",
+    "departement": "Dordogne",
+    "type": "inondations et coulées de boue",
+    "day": 28,
+    "date": "2026-07-19",
+    "lat": 44.9432,
+    "lon": 0.5631
   }
 ]
