@@ -1,15 +1,27 @@
-name: Climat2027 — post quotidien
+name: Climat2027 — posts quotidiens
 
 on:
   schedule:
-    - cron: '0 8 * * *'   # tous les jours à 8h UTC (10h heure de Paris)
-  workflow_dispatch:        # permet de lancer manuellement depuis Actions
+    - cron: '0 7 * * *'    # 7h UTC = 9h heure de Paris (été, CEST UTC+2)
+    - cron: '0 8 * * *'    # 8h UTC = 9h heure de Paris (hiver, CET UTC+1)
+    - cron: '0 11 * * *'   # 11h UTC = 13h heure de Paris (été, CEST UTC+2)
+    - cron: '0 12 * * *'   # 12h UTC = 13h heure de Paris (hiver, CET UTC+1)
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Mode à lancer (all ou carte_gaspar)'
+        required: false
+        default: 'all'
 
 permissions:
-  contents: write   # nécessaire pour commiter state.json, markers.json, etc.
+  contents: write
 
 jobs:
-  post:
+  # ── Job 1 : 8h — post commune + stats + réponses ─────────────────
+  post_quotidien:
+    if: >
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.mode != 'carte_gaspar')
+      || (github.event_name == 'schedule' && (github.event.schedule == '0 7 * * *' || github.event.schedule == '0 8 * * *'))
     runs-on: ubuntu-latest
     steps:
       - name: Récupère le dépôt
@@ -32,15 +44,110 @@ jobs:
           }
           CREDS
 
-      - name: Lance le script principal
-        run: python climat2027.py --map-url "${{ vars.MAP_URL || 'https://omarce91.github.io/Climat2027/' }}"
+      - name: Lance le script principal (commune + stats + likes)
+        run: |
+          python climat2027.py \
+            --map-url "${{ vars.MAP_URL || 'https://omarce91.github.io/Climat2027/' }}"
 
-      - name: Sauvegarde les fichiers d'état et la carte
+      - name: Sauvegarde les fichiers d'état
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add state.json markers.json humor_state.json \
-                  humor_reply_state.json humor_stats.json
+                  humor_reply_state.json humor_stats.json \
+                  commune_coords_cache.json || true
           git diff --cached --quiet || \
             git commit -m "Post automatique $(date +%F)"
+          git push
+
+  # ── Job 2 : 14h — carte #CommunesSinistreesDuJour ────────────────
+  carte_gaspar:
+    if: >
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'carte_gaspar')
+      || (github.event_name == 'schedule' && (github.event.schedule == '0 11 * * *' || github.event.schedule == '0 12 * * *'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupère le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installe Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Installe les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Crée credentials.json depuis les secrets GitHub
+        run: |
+          cat > credentials.json << CREDS
+          {
+            "handle": "${{ secrets.BSKY_HANDLE }}",
+            "app_password": "${{ secrets.BSKY_APP_PASSWORD }}"
+          }
+          CREDS
+
+      - name: Poste la carte #CommunesSinistreesDuJour
+        run: |
+          GASPAR=$(ls catnat_gaspar*.csv 2>/dev/null | tail -1)
+          if [ -z "$GASPAR" ]; then
+            echo "Aucun fichier catnat_gaspar*.csv trouvé — carte ignorée."
+            exit 0
+          fi
+          python - << PYEOF
+import sys
+sys.path.insert(0, '.')
+from pathlib import Path
+from climat2027 import (
+    load_credentials, build_richtext, load_gaspar_communes,
+    build_coords_cache, generate_gaspar_map, ensure_gaspar_cache
+)
+
+try:
+    from atproto import Client, client_utils
+except ImportError:
+    sys.exit("pip install atproto")
+
+handle, app_password, _, _ = load_credentials(Path("credentials.json"))
+client = Client()
+client.login(handle, app_password)
+
+gaspar_csv   = Path("$GASPAR")
+cache_file   = Path("commune_coords_cache.json")
+
+print("Vérification du cache de coordonnées…")
+ensure_gaspar_cache(gaspar_csv, cache_file)
+
+communes = load_gaspar_communes(gaspar_csv)
+coords   = build_coords_cache({c["code_insee"] for c in communes}, cache_file)
+img      = generate_gaspar_map(communes, coords)
+
+if img is None:
+    sys.exit("Impossible de générer la carte.")
+
+POST_TEXT = (
+    "M. ou Mme les Maires, parrainerez-vous une candidature "
+    "pour la #présidentielle2027 ?\n"
+    "#CommunesSinistreesDuJour #Climat2027 #presidentielle2027"
+)
+ALT_TEXT = (
+    "Carte de France des communes reconnues en état de catastrophe "
+    "naturelle depuis le 24 avril 2022 (hors secousses sismiques). "
+    "Source : GASPAR / Géorisques."
+)
+result = client.send_image(
+    text=build_richtext(client_utils, POST_TEXT),
+    image=img,
+    image_alt=ALT_TEXT
+)
+print(f"Carte postée : {result.uri}")
+PYEOF
+
+      - name: Sauvegarde le cache de coordonnées
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add commune_coords_cache.json || true
+          git diff --cached --quiet || \
+            git commit -m "Mise à jour cache coords $(date +%F)"
           git push

@@ -66,7 +66,7 @@ BASE_WEIGHT          = 3       # poids plancher pour les messages sans score
 # Authentification (commun à tous les modes)
 # ─────────────────────────────────────────────────────────────────────
 
-def load_credentials(config_file: Path) -> tuple[str, str, str | None]:
+def load_credentials(config_file: Path) -> tuple[str, str, str | None, str | None]:
     if not config_file.exists():
         sys.exit(
             f"Fichier d'identifiants introuvable : {config_file}\n"
@@ -81,8 +81,9 @@ def load_credentials(config_file: Path) -> tuple[str, str, str | None]:
     app_password = data.get("app_password")
     if not handle or not app_password:
         sys.exit("credentials.json doit contenir 'handle' et 'app_password'.")
-    map_url = data.get("map_url") or None
-    return handle, app_password, map_url
+    map_url         = data.get("map_url") or None
+    mistral_api_key = data.get("mistral_api_key") or None
+    return handle, app_password, map_url, mistral_api_key
 
 
 def build_richtext(client_utils, text: str):
@@ -98,6 +99,384 @@ def build_richtext(client_utils, text: str):
         else:
             builder.text(tok)
     return builder
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Intégration Mistral
+# ─────────────────────────────────────────────────────────────────────
+
+def _call_mistral(prompt: str, api_key: str,
+                  model: str = "mistral-small-latest",
+                  temperature: float = 0.2) -> str:
+    """Appel HTTP direct à l'API Mistral (pas de dépendance externe)."""
+    payload = json.dumps({
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 800,
+        "temperature": temperature,
+    }).encode()
+    req = urllib.request.Request(
+        "https://api.mistral.ai/v1/chat/completions",
+        data=payload,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {api_key}",
+        }
+    )
+    with urllib.request.urlopen(req, timeout=30) as r:
+        data = json.loads(r.read())
+    return data["choices"][0]["message"]["content"].strip()
+
+
+def mistral_select_best_response(liked_post_text: str,
+                                  candidates: list[str],
+                                  api_key: str) -> str | None:
+    """Demande à Mistral de choisir le message le plus pertinent parmi
+    les candidats pour répondre au post liké.
+    Retourne le texte du message choisi, ou None en cas d'échec."""
+    if not candidates:
+        return None
+    numbered = "\n\n".join(f"[{i+1}]\n{m}" for i, m in enumerate(candidates))
+    prompt = f"""Tu aides la campagne #Climat2027 sur Bluesky.
+Cette campagne mobilise pour que le climat soit au cœur du débat de la présidentielle 2027.
+
+Voici un post Bluesky que nous avons liké et auquel nous voulons répondre :
+---
+{liked_post_text}
+---
+
+Voici nos messages de réponse disponibles :
+{numbered}
+
+Quel numéro de message est le plus pertinent et percutant à poster en réponse à ce post ?
+Réponds UNIQUEMENT avec le numéro (ex: "3"), rien d'autre."""
+    try:
+        result = _call_mistral(prompt, api_key, temperature=0.1)
+        idx = int(re.search(r'\d+', result).group()) - 1
+        if 0 <= idx < len(candidates):
+            print(f"  [Mistral] Message #{idx+1} sélectionné.")
+            return candidates[idx]
+    except Exception as e:
+        print(f"  [Mistral] Échec de la sélection ({e}), fallback sur tirage pondéré.")
+    return None
+
+
+def mistral_propose_messages(recent_liked_texts: list[str],
+                              existing_posts: list[str],
+                              slogan: str,
+                              api_key: str,
+                              n: int = 5) -> list[str]:
+    """Demande à Mistral de proposer N nouveaux messages pour la campagne,
+    en s'inspirant du contexte des derniers posts likés."""
+    sample_existing = "\n".join(
+        f"• {p.splitlines()[0][:80]}" for p in existing_posts[:8]
+    )
+    liked_context = ""
+    if recent_liked_texts:
+        liked_context = "\nContexte — posts récemment likés :\n" + \
+            "\n".join(f"• {t[:120]}" for t in recent_liked_texts[:5])
+
+    prompt = f"""Tu aides la campagne #Climat2027 sur Bluesky.
+Slogan central : "{slogan.splitlines()[0]}"
+
+Exemples de messages existants (style à respecter) :
+{sample_existing}
+{liked_context}
+
+Propose {n} nouveaux messages ORIGINAUX pour cette campagne.
+
+Contraintes STRICTES :
+- Chaque message fait au maximum 200 caractères (texte seul)
+- Ton humoristique, décalé ou percutant, en français
+- Doit finir par : #Climat2027 #présidentielle2027 #presidentielle2027
+- Séparés par une ligne contenant uniquement "---"
+- Pas de numérotation, pas d'explication, UNIQUEMENT les messages"""
+    try:
+        result = _call_mistral(prompt, api_key, temperature=0.8)
+        proposals = []
+        for block in re.split(r'\n-{3,}\n', result):
+            block = block.strip()
+            if block and len(block) > 20:
+                # Assure que les hashtags finaux sont présents
+                if '#Climat2027' not in block:
+                    block += '\n#Climat2027 #présidentielle2027 #presidentielle2027'
+                proposals.append(block)
+        return proposals
+    except Exception as e:
+        print(f"  [Mistral] Erreur lors de la génération ({e}).")
+        return []
+
+
+def _append_to_humor_posts(message: str, posts_file: Path) -> None:
+    """Ajoute un nouveau message validé à la fin de humor_posts.md."""
+    content = posts_file.read_text(encoding="utf-8")
+    if not content.endswith('\n'):
+        content += '\n'
+    content += f"\n{message}\n\n---\n"
+    posts_file.write_text(content, encoding="utf-8")
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Carte GASPAR quotidienne — #CommunesSinistreesDuJour
+# ─────────────────────────────────────────────────────────────────────
+
+# Types exclus de la carte (non climatiques)
+_GASPAR_EXCLUDE = {
+    'Secousse Sismique', 'Secousse sismique', 'SECOUSSE SISMIQUE',
+}
+
+# Correspondance type GASPAR → couleur carte
+_GASPAR_COLORS = [
+    (['sécheresse', 'secheresse'],                '#E65100'),
+    (['inondations', 'coulées', 'coulee'],         '#1565C0'),
+    (['nappe'],                                    '#00838F'),
+    (['avalanche'],                                '#7B1FA2'),
+    (['mouvement', 'terrain'],                     '#795548'),
+    (['vagues', 'choc'],                           '#00897B'),
+    (['vent', 'cyclon'],                           '#607D8B'),
+]
+
+def _gaspar_color(type_str: str) -> str:
+    # Normalise en ASCII pour matcher indépendamment de l'encodage source
+    t = unicodedata.normalize("NFKD", type_str).encode("ascii", "ignore").decode().lower()
+    for keys, color in _GASPAR_COLORS:
+        if any(k in t for k in keys):
+            return color
+    return '#9E9E9E'
+
+
+def _load_coords_cache(cache_file: Path) -> dict:
+    if cache_file.exists():
+        return json.loads(cache_file.read_text(encoding="utf-8"))
+    return {}
+
+
+def _save_coords_cache(cache_file: Path, cache: dict) -> None:
+    cache_file.write_text(json.dumps(cache, ensure_ascii=False), encoding="utf-8")
+
+
+def _fetch_dept_coords(dept_code: str) -> dict:
+    """Récupère les coordonnées (centre) de toutes les communes d'un
+    département via geo.api.gouv.fr. Retourne {code_insee: (lat, lon)}."""
+    url = (
+        f"https://geo.api.gouv.fr/communes"
+        f"?codeDepartement={dept_code}&fields=centre&limit=1000"
+    )
+    try:
+        with urllib.request.urlopen(url, timeout=15) as r:
+            data = json.loads(r.read())
+        result = {}
+        for c in data:
+            code = c.get("code")
+            coords = c.get("centre", {}).get("coordinates")
+            if code and coords and len(coords) == 2:
+                result[code] = (coords[1], coords[0])  # (lat, lon)
+        return result
+    except Exception:
+        return {}
+
+
+def build_coords_cache(codes_insee: set, cache_file: Path,
+                       delay: float = 0.1) -> dict:
+    """Construit ou complète le cache de coordonnées pour les codes INSEE
+    demandés. Les codes déjà en cache ne sont pas re-téléchargés.
+    Requêtes groupées par département (~2 chiffres du code INSEE)."""
+    cache = _load_coords_cache(cache_file)
+    missing_codes = codes_insee - set(cache.keys())
+    if not missing_codes:
+        return cache
+
+    # Grouper les codes manquants par département
+    depts = set()
+    for code in missing_codes:
+        dept = code[:3] if code.startswith('97') else code[:2]
+        depts.add(dept)
+
+    print(f"  [coords] Téléchargement des coords pour "
+          f"{len(missing_codes)} communes ({len(depts)} département(s))…")
+    for dept in sorted(depts):
+        result = _fetch_dept_coords(dept)
+        cache.update(result)
+        time.sleep(delay)
+
+    _save_coords_cache(cache_file, cache)
+    still_missing = missing_codes - set(cache.keys())
+    if still_missing:
+        print(f"  [coords] {len(still_missing)} commune(s) sans coordonnées.")
+    return cache
+
+
+def ensure_gaspar_cache(gaspar_csv: Path, cache_file: Path,
+                        depuis: str = "2022-04-24") -> None:
+    """Vérifie que le cache de coordonnées est complet pour toutes les
+    communes du GASPAR, et le complète si nécessaire. À appeler au
+    lancement pour éviter un délai lors du post quotidien."""
+    if not gaspar_csv.exists():
+        print(f"  [cache] CSV GASPAR introuvable : {gaspar_csv} — cache ignoré.")
+        return
+
+    communes = load_gaspar_communes(gaspar_csv, depuis=depuis)
+    codes    = {c["code_insee"] for c in communes if c["code_insee"]}
+    cache    = _load_coords_cache(cache_file)
+    missing  = codes - set(cache.keys())
+
+    if not missing:
+        print(f"  [cache] commune_coords_cache.json OK "
+              f"({len(cache)} entrées, aucune mise à jour nécessaire).")
+        return
+
+    print(f"  [cache] {len(missing)}/{len(codes)} commune(s) absente(s) "
+          f"du cache — mise à jour…")
+    build_coords_cache(codes, cache_file)
+    cache_apres = _load_coords_cache(cache_file)
+    print(f"  [cache] commune_coords_cache.json mis à jour : "
+          f"{len(cache_apres)} entrées.")
+
+
+def load_gaspar_communes(gaspar_csv: Path,
+                         depuis: str = "2022-04-24") -> list[dict]:
+    """Charge le CSV GASPAR, filtre depuis `depuis`, exclut les secousses
+    sismiques, et déduplique par (code_commune, type)."""
+    import csv as _csv
+    raw = gaspar_csv.read_bytes()
+    # Détecte l'encodage : essaie UTF-8 d'abord, repli sur latin-1
+    for enc in ('utf-8-sig', 'utf-8', 'latin-1'):
+        try:
+            text = raw.decode(enc)
+            break
+        except UnicodeDecodeError:
+            continue
+    else:
+        text = raw.decode('latin-1', errors='replace')
+
+    # Normalise les noms de types (supprime accents) pour comparaisons
+    def norm(s):
+        return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower()
+
+    # Mots-clés identifiant les secousses sismiques (normalisés)
+    SISMIQUE_KEYS = {'secousse', 'sismique'}
+
+    seen = set()
+    rows = []
+    reader = _csv.DictReader(__import__('io').StringIO(text), delimiter=";")
+    for row in reader:
+        date_pub = (row.get("date_publication_jo") or "")[:10]
+        if date_pub < depuis:
+            continue
+        type_raw = (row.get("lib_risque_jo") or "").strip()
+        # Exclut les secousses sismiques (robuste à l'encodage)
+        type_norm = norm(type_raw)
+        if any(k in type_norm for k in SISMIQUE_KEYS):
+            continue
+        code = (row.get("code_commune") or "").strip()
+        key  = (code, type_raw)
+        if key in seen:
+            continue
+        seen.add(key)
+        rows.append({
+            "code_insee": code,
+            "commune":    (row.get("libelle_commune") or "").strip(),
+            "type":       type_raw,
+        })
+    return rows
+
+
+def generate_gaspar_map(gaspar_communes: list[dict],
+                        coords_cache: dict,
+                        width: int = 1200, height: int = 900) -> bytes | None:
+    """Génère une carte de toutes les communes sinistrées du GASPAR
+    (hors secousses sismiques) avec des marqueurs colorés par type.
+    Retourne les bytes PNG ou None en cas d'échec."""
+    try:
+        from staticmap import StaticMap, CircleMarker
+    except ImportError:
+        print("  [carte GASPAR] 'staticmap' non installé.")
+        return None
+    try:
+        m = StaticMap(
+            width, height,
+            url_template='https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            headers={
+                'User-Agent':
+                    'Climat2027-bot/1.0 (+https://github.com/omarce91/Climat2027)'
+            }
+        )
+        added = 0
+        for c in gaspar_communes:
+            coords = coords_cache.get(c["code_insee"])
+            if not coords:
+                continue
+            lat, lon = coords
+            color = _gaspar_color(c["type"])
+            m.add_marker(CircleMarker((lon, lat), 'white', 5))
+            m.add_marker(CircleMarker((lon, lat), color,  3))
+            added += 1
+
+        if added == 0:
+            print("  [carte GASPAR] Aucune commune avec coordonnées.")
+            return None
+
+        image = m.render()
+        buf = io.BytesIO()
+        image.save(buf, format='PNG', optimize=True)
+        data = buf.getvalue()
+        print(f"  [carte GASPAR] {added} communes représentées "
+              f"({len(data)//1024} Ko).")
+        return data
+    except Exception as e:
+        print(f"  [carte GASPAR] Erreur : {e}")
+        return None
+
+
+def post_gaspar_map(client, client_utils,
+                    gaspar_csv: Path,
+                    coords_cache_file: Path,
+                    dry_run: bool = False) -> None:
+    """Génère et poste la carte quotidienne #CommunesSinistreesDuJour.
+    Best-effort : aucune erreur ici ne bloque le reste de la campagne."""
+
+    POST_TEXT = (
+        "M. ou Mme les Maires, parrainerez-vous une candidature "
+        "pour la #présidentielle2027 ?\n"
+        "#CommunesSinistreesDuJour #Climat2027 #presidentielle2027"
+    )
+    ALT_TEXT  = (
+        "Carte de France des communes reconnues en état de catastrophe "
+        "naturelle depuis le 24 avril 2022 (hors secousses sismiques). "
+        "Source : GASPAR / Géorisques."
+    )
+
+    print("Génération de la carte #CommunesSinistreesDuJour…")
+
+    # Charge les communes GASPAR
+    if not gaspar_csv.exists():
+        print(f"  [carte GASPAR] Fichier introuvable : {gaspar_csv} — carte ignorée.")
+        return
+    communes = load_gaspar_communes(gaspar_csv)
+    print(f"  {len(communes)} communes sinistrées (doublon type/commune dédupliqué).")
+
+    # Coordonnées (cache)
+    codes = {c["code_insee"] for c in communes}
+    coords = build_coords_cache(codes, coords_cache_file)
+
+    # Génération de l'image
+    img = generate_gaspar_map(communes, coords)
+    if img is None:
+        return
+
+    print(f"  Post : {POST_TEXT[:60]}…")
+    if dry_run:
+        print("  [dry-run] Carte non postée.")
+        return
+
+    try:
+        richtext = build_richtext(client_utils, POST_TEXT)
+        result   = client.send_image(
+            text=richtext, image=img, image_alt=ALT_TEXT
+        )
+        print(f"  Carte postée : {result.uri}")
+    except Exception as e:
+        print(f"  [carte GASPAR] Erreur lors du post ({e}).")
 
 
 # ─────────────────────────────────────────────────────────────────────
@@ -170,7 +549,7 @@ def _geocode_commune(commune: str, departement: str) -> tuple[float, float] | No
     return None
 
 
-# Correspondance type sinistre → couleur (identique à map.html)
+# Correspondance type sinistre → couleur (identique à index.html)
 # ⚠️ L'ordre compte : 'nappe' doit être testé avant 'inondation' car
 # "inondation par remontée de nappe" contient les deux mots.
 _TYPE_COLORS = [
@@ -538,7 +917,9 @@ def _build_reply_refs(models, post):
     return root, parent
 
 
-def run_reply_mode(args, client, posts, slogan, stats, client_utils, models) -> None:
+def run_reply_mode(args, client, posts, slogan, stats,
+                   client_utils, models,
+                   mistral_api_key: str | None = None) -> None:
     state_file = Path(args.humor_reply_state_file)
     my_did     = client.me.did
     since_dt   = datetime.now(timezone.utc) - timedelta(hours=args.hours)
@@ -546,6 +927,10 @@ def run_reply_mode(args, client, posts, slogan, stats, client_utils, models) -> 
     print(f"Recherche des likes depuis {since_dt.isoformat()}...")
     liked = _get_recent_likes(client, since_dt)
     print(f"{len(liked)} post(s) liké(s) dans la fenêtre de {args.hours}h.")
+    if mistral_api_key:
+        print("  [Mistral] Sélection intelligente activée.")
+    else:
+        print("  [Mistral] Clé absente — tirage pondéré par score.")
 
     state = _load_humor_state(state_file)
     sent = skipped = errors = 0
@@ -566,8 +951,19 @@ def run_reply_mode(args, client, posts, slogan, stats, client_utils, models) -> 
             skipped += 1
             continue
 
-        post_text = pick_message(posts, slogan, state.get("last_text"), stats)
-        author    = getattr(thread_post.author, "handle", "?")
+        # Sélection du message : Mistral si disponible, sinon pondéré
+        liked_text = _text_of(thread_post)
+        if mistral_api_key and liked_text:
+            candidates = [p for p in posts if p != state.get("last_text")]
+            if slogan != state.get("last_text"):
+                candidates = [slogan] + candidates
+            post_text = mistral_select_best_response(
+                liked_text, candidates, mistral_api_key
+            ) or pick_message(posts, slogan, state.get("last_text"), stats)
+        else:
+            post_text = pick_message(posts, slogan, state.get("last_text"), stats)
+
+        author = getattr(thread_post.author, "handle", "?")
         print(f"--- @{author} ← {_describe(post_text, posts, slogan, stats)} ---")
         print(post_text)
 
@@ -597,6 +993,96 @@ def run_reply_mode(args, client, posts, slogan, stats, client_utils, models) -> 
     print(f"Terminé : {sent} envoyé(s), {skipped} déjà répondu(s), {errors} erreur(s).")
 
 
+def run_propose_mode(args, client, posts: list[str], slogan: str,
+                     mistral_api_key: str) -> None:
+    """Mode interactif (local uniquement) : Mistral propose de nouveaux
+    messages, l'utilisateur valide chacun avant ajout à humor_posts.md."""
+    posts_file = Path(args.humor_posts_file)
+    n          = getattr(args, 'proposals', 5)
+
+    # Récupère les derniers posts likés pour le contexte (optionnel)
+    recent_liked_texts: list[str] = []
+    if client:
+        try:
+            since_dt = datetime.now(timezone.utc) - timedelta(hours=72)
+            liked    = _get_recent_likes(client, since_dt)
+            print(f"{len(liked)} likes récents récupérés pour le contexte.")
+            for subject in liked[:8]:
+                try:
+                    res  = client.get_post_thread(uri=subject["uri"], depth=0)
+                    text = _text_of(res.thread.post)
+                    if text:
+                        recent_liked_texts.append(text)
+                except Exception:
+                    pass
+        except Exception as e:
+            print(f"Impossible de récupérer les likes ({e}) — génération sans contexte.")
+
+    print(f"\nGénération de {n} propositions avec Mistral...")
+    proposals = mistral_propose_messages(
+        recent_liked_texts, posts, slogan, mistral_api_key, n=n
+    )
+
+    if not proposals:
+        print("Aucune proposition générée.")
+        return
+
+    print(f"\n{len(proposals)} proposition(s) reçue(s). Validation interactive :\n")
+    validated = 0
+
+    for i, proposal in enumerate(proposals):
+        print(f"{'═'*56}")
+        print(f"Proposition {i+1}/{len(proposals)} ({len(proposal)} car.) :")
+        print(f"{'─'*56}")
+        print(proposal)
+        print(f"{'─'*56}")
+
+        while True:
+            choix = input("[o]ui  [n]on  [e]diter  [q]uitter : ").strip().lower()
+
+            if choix in ('o', 'oui', 'y'):
+                _append_to_humor_posts(proposal, posts_file)
+                print("✓ Ajouté à humor_posts.md\n")
+                validated += 1
+                break
+
+            elif choix in ('n', 'non'):
+                print("✗ Ignoré.\n")
+                break
+
+            elif choix in ('e', 'edit'):
+                print("Entrez le message modifié (ligne vide pour terminer) :")
+                lines = []
+                while True:
+                    line = input()
+                    if line == '':
+                        break
+                    lines.append(line)
+                if lines:
+                    edited = '\n'.join(lines)
+                    print(f"\nMessage modifié :\n{'─'*40}\n{edited}\n{'─'*40}")
+                    if input("Confirmer ? [o/n] : ").strip().lower() in ('o', 'oui'):
+                        _append_to_humor_posts(edited, posts_file)
+                        print("✓ Ajouté à humor_posts.md\n")
+                        validated += 1
+                    else:
+                        print("✗ Ignoré.\n")
+                break
+
+            elif choix in ('q', 'quit'):
+                print("Arrêt de la validation.")
+                break
+
+        if choix in ('q', 'quit'):
+            break
+
+    print(f"\n{'═'*56}")
+    print(f"Session terminée : {validated}/{len(proposals)} message(s) ajouté(s) à humor_posts.md.")
+    if validated:
+        posts_updated = _load_humor_posts(posts_file)
+        print(f"humor_posts.md contient maintenant {len(posts_updated)} messages.")
+
+
 # ─────────────────────────────────────────────────────────────────────
 # Point d'entrée
 # ─────────────────────────────────────────────────────────────────────
@@ -605,9 +1091,12 @@ def main():
     parser = argparse.ArgumentParser(
         description="Script central #Climat2027 — commune (défaut), post, reply."
     )
-    parser.add_argument("--mode", choices=["all", "commune", "post", "reply"],
+    parser.add_argument("--mode", choices=["all", "commune", "post", "reply", "propose"],
                         default="all",
-                        help="Mode d'exécution (défaut : all = commune + stats + reply)")
+                        help=(
+                            "Mode d'exécution (défaut : all = commune + stats + reply). "
+                            "'propose' : génération interactive de nouveaux messages via Mistral (local uniquement)."
+                        ))
     parser.add_argument("--config", default="credentials.json")
     parser.add_argument("--dry-run", action="store_true")
 
@@ -616,6 +1105,11 @@ def main():
     grp_c.add_argument("--commune-posts-file",  default="posts.md")
     grp_c.add_argument("--commune-state-file",  default="state.json")
     grp_c.add_argument("--markers-file",        default="markers.json")
+    grp_c.add_argument("--gaspar-csv",           default=None,
+                       help="Chemin vers le CSV GASPAR pour la carte "
+                            "#CommunesSinistreesDuJour (ex: catnat_gaspar.csv)")
+    grp_c.add_argument("--coords-cache",         default="commune_coords_cache.json",
+                       help="Cache des coordonnées communes (créé auto, défaut: commune_coords_cache.json)")
     grp_c.add_argument("--map-url",             default=None,
                        help="URL de base de la carte (ex: https://compte.github.io/repo/). "
                             "Si absent, lu depuis credentials.json (champ 'map_url').")
@@ -633,6 +1127,8 @@ def main():
                        help="Affiche le classement sans poster")
     grp_h.add_argument("--show-stats",  action="store_true",
                        help="Affiche le classement après l'envoi")
+    grp_h.add_argument("--proposals",   type=int, default=5,
+                       help="[mode propose] Nombre de messages à générer (défaut: 5)")
 
     # Mode reply seulement
     grp_r = parser.add_argument_group("mode reply")
@@ -644,7 +1140,26 @@ def main():
 
     # ── Mode all : commune + stats + reply ───────────────────────────
     if args.mode == "all":
-        handle, app_password, cred_map_url = load_credentials(Path(args.config))
+        # ── Détection automatique du CSV GASPAR ──────────────────────
+        # Si --gaspar-csv n'est pas fourni, cherche un fichier
+        # catnat_gaspar*.csv dans le dossier courant.
+        if not args.gaspar_csv:
+            import glob
+            found = sorted(glob.glob("catnat_gaspar*.csv"))
+            if found:
+                args.gaspar_csv = found[-1]   # prend le plus récent
+                print(f"CSV GASPAR détecté automatiquement : {args.gaspar_csv}")
+
+        # ── Vérification/création du cache coords dès le démarrage ───
+        if args.gaspar_csv:
+            print("Vérification du cache de coordonnées communes…")
+            ensure_gaspar_cache(
+                gaspar_csv = Path(args.gaspar_csv),
+                cache_file = Path(args.coords_cache),
+            )
+            print()
+
+        handle, app_password, cred_map_url, mistral_api_key = load_credentials(Path(args.config))
         map_url = args.map_url or cred_map_url
         try:
             from atproto import Client, client_utils, models
@@ -657,6 +1172,19 @@ def main():
         print("1/3 — Post #1Jour1CommuneSinistree")
         print("═" * 50)
         run_commune_mode(args, client, client_utils, models, map_url)
+
+        # Carte GASPAR quotidienne (best-effort, entre étape 1 et 2)
+        if args.gaspar_csv:
+            print()
+            print("═" * 50)
+            print("1b — Carte #CommunesSinistreesDuJour")
+            print("═" * 50)
+            post_gaspar_map(
+                client, client_utils,
+                gaspar_csv         = Path(args.gaspar_csv),
+                coords_cache_file  = Path(args.coords_cache),
+                dry_run            = args.dry_run,
+            )
 
         for f in [Path(args.humor_posts_file), Path(args.slogan_file)]:
             if not f.exists():
@@ -683,12 +1211,13 @@ def main():
         print("═" * 50)
         print("3/3 — Réponses aux likes récents")
         print("═" * 50)
-        run_reply_mode(args, client, posts, slogan, stats, client_utils, models)
+        run_reply_mode(args, client, posts, slogan, stats, client_utils, models,
+                       mistral_api_key=mistral_api_key)
         return
 
     # ── Mode commune seul ─────────────────────────────────────────────
     if args.mode == "commune":
-        handle, app_password, cred_map_url = load_credentials(Path(args.config))
+        handle, app_password, cred_map_url, _ = load_credentials(Path(args.config))
         map_url = args.map_url or cred_map_url
         try:
             from atproto import Client, client_utils, models
@@ -699,7 +1228,7 @@ def main():
         run_commune_mode(args, client, client_utils, models, map_url)
         return
 
-    # ── Modes post / reply / stats-only ──────────────────────────────
+    # ── Modes post / reply / propose / stats-only ─────────────────────
     for f in [Path(args.humor_posts_file), Path(args.slogan_file)]:
         if not f.exists():
             sys.exit(f"Fichier introuvable : {f}")
@@ -709,13 +1238,23 @@ def main():
     if not posts:
         sys.exit(f"Aucun message trouvé dans {args.humor_posts_file}.")
 
-    handle, app_password, _ = load_credentials(Path(args.config))
+    handle, app_password, _, mistral_api_key = load_credentials(Path(args.config))
     try:
         from atproto import Client, client_utils, models
     except ImportError:
         sys.exit("pip install atproto")
     client = Client()
     client.login(handle, app_password)
+
+    # ── Mode propose (interactif, local uniquement) ───────────────────
+    if args.mode == "propose":
+        if not mistral_api_key:
+            sys.exit(
+                "La clé Mistral est requise pour le mode propose.\n"
+                "Ajoute 'mistral_api_key': 'ta-clé' dans credentials.json."
+            )
+        run_propose_mode(args, client, posts, slogan, mistral_api_key)
+        return
 
     if not args.dry_run:
         print("Mise à jour des stats...")
@@ -732,7 +1271,8 @@ def main():
     if args.mode == "post":
         run_post_mode(args, client, posts, slogan, stats, client_utils)
     else:
-        run_reply_mode(args, client, posts, slogan, stats, client_utils, models)
+        run_reply_mode(args, client, posts, slogan, stats, client_utils, models,
+                       mistral_api_key=mistral_api_key)
 
     if args.show_stats:
         print_stats(posts, slogan, _load_stats(Path(args.stats_file)))
