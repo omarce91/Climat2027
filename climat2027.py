@@ -377,6 +377,7 @@ def load_gaspar_communes(gaspar_csv: Path,
             "code_insee": code,
             "commune":    (row.get("libelle_commune") or "").strip(),
             "type":       type_raw,
+            "date_debut": (row.get("date_debut") or "")[:10],
         })
     return rows
 
@@ -428,43 +429,112 @@ def generate_gaspar_map(gaspar_communes: list[dict],
         return None
 
 
+def _is_metropole(code_insee: str) -> bool:
+    """Retourne True pour la France métropolitaine + Corse (exclut DOM-TOM).
+    Les codes DOM-TOM commencent par 97x (971-976)."""
+    return bool(code_insee) and not code_insee.startswith('97')
+
+
+_MOIS_FR = [
+    '', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+    'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
+]
+
+
+def _date_fr(d: date | None = None) -> str:
+    """Retourne la date en français : ex. '20 juillet'."""
+    d = d or date.today()
+    return f"{d.day} {_MOIS_FR[d.month]}"
+
+
 def post_gaspar_map(client, client_utils,
                     gaspar_csv: Path,
                     coords_cache_file: Path,
+                    gaspar_state_file: Path | None = None,
                     dry_run: bool = False) -> None:
     """Génère et poste la carte quotidienne #CommunesSinistreesDuJour.
+    Centrée sur la France métropolitaine + Corse uniquement.
+    Ne poste pas deux fois le même jour (fichier d'état gaspar_map_state.json).
     Best-effort : aucune erreur ici ne bloque le reste de la campagne."""
 
-    POST_TEXT = (
-        "M. ou Mme les Maires, parrainerez-vous une candidature "
-        "pour la #présidentielle2027 ?\n"
-        "#CommunesSinistreesDuJour #Climat2027 #presidentielle2027"
-    )
-    ALT_TEXT  = (
-        "Carte de France des communes reconnues en état de catastrophe "
-        "naturelle depuis le 24 avril 2022 (hors secousses sismiques). "
-        "Source : GASPAR / Géorisques."
-    )
+    state_file = gaspar_state_file or Path("gaspar_map_state.json")
+
+    # ── Protection double envoi ──────────────────────────────────────
+    today_iso = date.today().isoformat()
+    gaspar_state = {}
+    if state_file.exists():
+        try:
+            gaspar_state = json.loads(state_file.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    if gaspar_state.get("last_posted_date") == today_iso:
+        print("  [carte GASPAR] Déjà postée aujourd'hui — ignorée.")
+        return
 
     print("Génération de la carte #CommunesSinistreesDuJour…")
 
-    # Charge les communes GASPAR
     if not gaspar_csv.exists():
         print(f"  [carte GASPAR] Fichier introuvable : {gaspar_csv} — carte ignorée.")
         return
-    communes = load_gaspar_communes(gaspar_csv)
-    print(f"  {len(communes)} communes sinistrées (doublon type/commune dédupliqué).")
 
-    # Coordonnées (cache)
-    codes = {c["code_insee"] for c in communes}
+    # ── Charge et filtre les communes (métropole + Corse uniquement) ─
+    toutes = load_gaspar_communes(gaspar_csv)
+    communes = [c for c in toutes if _is_metropole(c["code_insee"])]
+    n_metropole = len(communes)
+    print(f"  {n_metropole} communes métropole + Corse "
+          f"(sur {len(toutes)} total dont DOM-TOM exclus).")
+
+    # ── Compte et sélectionne les communes sinistrées ce jour-mois ───
+    today      = date.today()
+    mois_jour  = f"{today.month:02d}-{today.day:02d}"   # ex: "07-20"
+
+    # Une seule passe : on garde les entrées dont date_debut correspond
+    # exactement au jour-mois (toutes années confondues depuis 2022).
+    communes_jour = [
+        c for c in communes
+        if len(c["date_debut"]) >= 10 and c["date_debut"][5:10] == mois_jour
+    ]
+    # Pour le comptage : communes distinctes (une commune peut avoir plusieurs
+    # types de sinistre le même jour)
+    n_jour = len({c["code_insee"] for c in communes_jour})
+    print(f"  {n_jour} commune(s) sinistrée(s) un {_date_fr(today)} (toutes années).")
+
+    if n_jour == 0:
+        print(f"  Aucune commune sinistrée un {_date_fr(today)} — carte non postée.")
+        return
+
+    # ── Coordonnées et génération de l'image ─────────────────────────
+    codes  = {c["code_insee"] for c in communes_jour}
     coords = build_coords_cache(codes, coords_cache_file)
 
-    # Génération de l'image
-    img = generate_gaspar_map(communes, coords)
+    # ── Génération de l'image ─────────────────────────────────────────
+    img    = generate_gaspar_map(communes_jour, coords)
     if img is None:
         return
 
-    print(f"  Post : {POST_TEXT[:60]}…")
+    # ── Texte du post avec date et comptage ──────────────────────────
+    date_str  = _date_fr(today)
+    POST_TEXT = (
+        f"{n_jour} commune{'s' if n_jour > 1 else ''} sinistrée{'s' if n_jour > 1 else ''} "
+        f"le {date_str} depuis 2022. "
+        f"M. ou Mme les Maires, parrainerez-vous une candidature "
+        f"pour la #présidentielle2027 ?\n"
+        f"#CommunesSinistreesDuJour #Climat2027"
+    )
+    ALT_TEXT = (
+        f"Carte de France des {n_metropole} communes reconnues en état de "
+        "catastrophe naturelle depuis le 24 avril 2022 "
+        "(France métropolitaine + Corse, hors secousses sismiques). "
+        f"{n_jour} commune(s) touchée(s) un {date_str}. "
+        "Source : GASPAR / Géorisques."
+    )
+
+    if len(POST_TEXT) > MAX_POST_LENGTH:
+        print(f"  [carte GASPAR] Post trop long ({len(POST_TEXT)} car.) — ignoré.")
+        return
+
+    print(f"  Post ({len(POST_TEXT)} car.) : {POST_TEXT[:80]}…")
+
     if dry_run:
         print("  [dry-run] Carte non postée.")
         return
@@ -473,6 +543,12 @@ def post_gaspar_map(client, client_utils,
         richtext = build_richtext(client_utils, POST_TEXT)
         result   = client.send_image(
             text=richtext, image=img, image_alt=ALT_TEXT
+        )
+        gaspar_state["last_posted_date"] = today_iso
+        gaspar_state["last_uri"]         = result.uri
+        state_file.write_text(
+            json.dumps(gaspar_state, ensure_ascii=False, indent=2),
+            encoding="utf-8"
         )
         print(f"  Carte postée : {result.uri}")
     except Exception as e:
@@ -1183,6 +1259,7 @@ def main():
                 client, client_utils,
                 gaspar_csv         = Path(args.gaspar_csv),
                 coords_cache_file  = Path(args.coords_cache),
+                gaspar_state_file  = Path("gaspar_map_state.json"),
                 dry_run            = args.dry_run,
             )
 
