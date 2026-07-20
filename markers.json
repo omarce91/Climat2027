@@ -241,5 +241,14 @@
     "date": "2026-07-19",
     "lat": 44.9432,
     "lon": 0.5631
+  },
+  {
+    "commune": "Le Chautay",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 29,
+    "date": "2026-07-20",
+    "lat": 46.9855,
+    "lon": 2.9639
   }
 ]
