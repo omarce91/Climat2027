@@ -250,5 +250,14 @@
     "date": "2026-07-20",
     "lat": 46.9855,
     "lon": 2.9639
+  },
+  {
+    "commune": "Cherveux",
+    "departement": "Deux-Sèvres",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 30,
+    "date": "2026-07-21",
+    "lat": 46.423,
+    "lon": -0.3533
   }
 ]
