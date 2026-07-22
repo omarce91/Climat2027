@@ -259,5 +259,14 @@
     "date": "2026-07-21",
     "lat": 46.423,
     "lon": -0.3533
+  },
+  {
+    "commune": "Cressensac-Sarrazac",
+    "departement": "Lot",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 31,
+    "date": "2026-07-22",
+    "lat": 45.0175,
+    "lon": 1.5499
   }
 ]
