@@ -385,9 +385,9 @@ def load_gaspar_communes(gaspar_csv: Path,
 def generate_gaspar_map(gaspar_communes: list[dict],
                         coords_cache: dict,
                         width: int = 1200, height: int = 900) -> bytes | None:
-    """Génère une carte de toutes les communes sinistrées du GASPAR
-    (hors secousses sismiques) avec des marqueurs colorés par type.
-    Retourne les bytes PNG ou None en cas d'échec."""
+    """Génère une carte des communes sinistrées avec des marqueurs colorés.
+    Toujours centrée sur la France métropolitaine + Corse, zoom fixe,
+    quel que soit le nombre de communes à afficher."""
     try:
         from staticmap import StaticMap, CircleMarker
     except ImportError:
@@ -402,18 +402,22 @@ def generate_gaspar_map(gaspar_communes: list[dict],
                     'Climat2027-bot/1.0 (+https://github.com/omarce91/Climat2027)'
             }
         )
-        added = 0
-        for c in gaspar_communes:
-            coords = coords_cache.get(c["code_insee"])
+        # Marqueurs fantômes aux coins de la France métropole + Corse
+        # pour forcer le zoom sur l'ensemble du territoire
+        # (lon_min, lat_max), (lon_max, lat_min) = NW et SE
+        for corner_lon, corner_lat in [(-5.2, 51.1), (9.6, 41.3)]:
+            m.add_marker(CircleMarker((corner_lon, corner_lat), '#00000000', 1))
+
+        for i, marker in enumerate(gaspar_communes):
+            coords = coords_cache.get(marker["code_insee"])
             if not coords:
                 continue
             lat, lon = coords
-            color = _gaspar_color(c["type"])
-            m.add_marker(CircleMarker((lon, lat), 'white', 5))
-            m.add_marker(CircleMarker((lon, lat), color,  3))
-            added += 1
+            color = _gaspar_color(marker.get("type", ""))
+            m.add_marker(CircleMarker((lon, lat), 'white', 12))
+            m.add_marker(CircleMarker((lon, lat), color,   9))
 
-        if added == 0:
+        if not gaspar_communes:
             print("  [carte GASPAR] Aucune commune avec coordonnées.")
             return None
 
@@ -421,7 +425,8 @@ def generate_gaspar_map(gaspar_communes: list[dict],
         buf = io.BytesIO()
         image.save(buf, format='PNG', optimize=True)
         data = buf.getvalue()
-        print(f"  [carte GASPAR] {added} communes représentées "
+        n_placed = sum(1 for c in gaspar_communes if c["code_insee"] in coords_cache)
+        print(f"  [carte GASPAR] {n_placed} communes représentées "
               f"({len(data)//1024} Ko).")
         return data
     except Exception as e:
@@ -512,20 +517,25 @@ def post_gaspar_map(client, client_utils,
     if img is None:
         return
 
-    # ── Texte du post avec date et comptage ──────────────────────────
-    date_str  = _date_fr(today)
-    POST_TEXT = (
-        f"{n_jour} commune{'s' if n_jour > 1 else ''} sinistrée{'s' if n_jour > 1 else ''} "
-        f"le {date_str} depuis 2022. "
-        f"M. ou Mme les Maires, parrainerez-vous une candidature "
-        f"pour la #présidentielle2027 ?\n"
-        f"#CommunesSinistreesDuJour #Climat2027"
-    )
+    # ── Texte du post avec date, comptage et noms si ≤ 2 communes ────
+    date_str = _date_fr(today)
+    noms = sorted({c["commune"] for c in communes_jour})
+    if n_jour == 1:
+        intro  = f"1 commune sinistrée le {date_str} depuis 2022 : {noms[0]}."
+        maire  = "M. ou Mme le Maire, parrainerez-vous une candidature pour la #présidentielle2027 ?"
+    elif n_jour == 2:
+        intro  = f"2 communes sinistrées le {date_str} depuis 2022 : {noms[0]} et {noms[1]}."
+        maire  = "M. ou Mme les Maires, parrainerez-vous une candidature pour la #présidentielle2027 ?"
+    else:
+        s      = 's' if n_jour > 1 else ''
+        intro  = f"{n_jour} commune{s} sinistrée{s} le {date_str} depuis 2022."
+        maire  = "M. ou Mme les Maires, parrainerez-vous une candidature pour la #présidentielle2027 ?"
+
+    POST_TEXT = f"{intro} {maire}\n#CommunesSinistreesDuJour #Climat2027"
+
     ALT_TEXT = (
-        f"Carte de France des {n_metropole} communes reconnues en état de "
-        "catastrophe naturelle depuis le 24 avril 2022 "
-        "(France métropolitaine + Corse, hors secousses sismiques). "
-        f"{n_jour} commune(s) touchée(s) un {date_str}. "
+        f"Carte de France de {n_jour} commune(s) sinistrée(s) un {date_str}, "
+        "toutes années depuis 2022 (métropole + Corse, hors secousses sismiques). "
         "Source : GASPAR / Géorisques."
     )
 
