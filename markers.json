@@ -268,5 +268,14 @@
     "date": "2026-07-22",
     "lat": 45.0175,
     "lon": 1.5499
+  },
+  {
+    "commune": "Saint-Germain-de-Belvès",
+    "departement": "Dordogne",
+    "type": "inondations et coulées de boue",
+    "day": 32,
+    "date": "2026-07-23",
+    "lat": 44.8064,
+    "lon": 1.0344
   }
 ]
