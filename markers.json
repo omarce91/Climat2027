@@ -286,5 +286,14 @@
     "date": "2026-07-24",
     "lat": 46.8009,
     "lon": 2.6422
+  },
+  {
+    "commune": "Claix",
+    "departement": "Isère",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 34,
+    "date": "2026-07-25",
+    "lat": 45.1187,
+    "lon": 5.659
   }
 ]
