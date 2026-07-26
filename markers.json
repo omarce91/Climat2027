@@ -295,5 +295,14 @@
     "date": "2026-07-25",
     "lat": 45.1187,
     "lon": 5.659
+  },
+  {
+    "commune": "Sainte-Solange",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 35,
+    "date": "2026-07-26",
+    "lat": 47.1427,
+    "lon": 2.5516
   }
 ]
