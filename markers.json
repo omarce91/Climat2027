@@ -304,5 +304,14 @@
     "date": "2026-07-26",
     "lat": 47.1427,
     "lon": 2.5516
+  },
+  {
+    "commune": "Robecq",
+    "departement": "Pas-de-Calais",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 36,
+    "date": "2026-07-27",
+    "lat": 50.5915,
+    "lon": 2.5532
   }
 ]
