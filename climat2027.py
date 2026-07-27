@@ -521,20 +521,20 @@ def post_gaspar_map(client, client_utils,
     date_str = _date_fr(today)
     noms = sorted({c["commune"] for c in communes_jour})
     if n_jour == 1:
-        intro  = f"1 commune sinistrée le {date_str} depuis 2022 : {noms[0]}."
+        intro  = f"1 ville sinistrée un {date_str} depuis 2022 : {noms[0]}."
         maire  = "M. ou Mme le Maire, parrainerez-vous une candidature pour la #présidentielle2027 ?"
     elif n_jour == 2:
-        intro  = f"2 communes sinistrées le {date_str} depuis 2022 : {noms[0]} et {noms[1]}."
+        intro  = f"2 villes sinistrées un {date_str} depuis 2022 : {noms[0]} et {noms[1]}."
         maire  = "M. ou Mme les Maires, parrainerez-vous une candidature pour la #présidentielle2027 ?"
     else:
         s      = 's' if n_jour > 1 else ''
-        intro  = f"{n_jour} commune{s} sinistrée{s} le {date_str} depuis 2022."
+        intro  = f"{n_jour} ville{s} sinistrée{s} un {date_str} depuis 2022."
         maire  = "M. ou Mme les Maires, parrainerez-vous une candidature pour la #présidentielle2027 ?"
 
     POST_TEXT = f"{intro} {maire}\n#CommunesSinistreesDuJour #Climat2027"
 
     ALT_TEXT = (
-        f"Carte de France de {n_jour} commune(s) sinistrée(s) un {date_str}, "
+        f"Carte de France de {n_jour} ville(s) sinistrée(s) un {date_str}, "
         "toutes années depuis 2022 (métropole + Corse, hors secousses sismiques). "
         "Source : GASPAR / Géorisques."
     )
