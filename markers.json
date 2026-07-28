@@ -313,5 +313,14 @@
     "date": "2026-07-27",
     "lat": 50.5915,
     "lon": 2.5532
+  },
+  {
+    "commune": "Pleumeleuc",
+    "departement": "Ille-et-Vilaine",
+    "type": "inondations et coulées de boue",
+    "day": 37,
+    "date": "2026-07-28",
+    "lat": 48.1793,
+    "lon": -1.8889
   }
 ]
