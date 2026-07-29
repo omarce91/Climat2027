@@ -322,5 +322,14 @@
     "date": "2026-07-28",
     "lat": 48.1793,
     "lon": -1.8889
+  },
+  {
+    "commune": "Lys-Haut-Layon",
+    "departement": "Maine-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 38,
+    "date": "2026-07-29",
+    "lat": 47.1504,
+    "lon": -0.4618
   }
 ]
