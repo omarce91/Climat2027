@@ -331,5 +331,14 @@
     "date": "2026-07-29",
     "lat": 47.1504,
     "lon": -0.4618
+  },
+  {
+    "commune": "Saint-Jean-sur-Mayenne",
+    "departement": "Mayenne",
+    "type": "inondations et coulées de boue",
+    "day": 39,
+    "date": "2026-07-30",
+    "lat": 48.1422,
+    "lon": -0.7452
   }
 ]
