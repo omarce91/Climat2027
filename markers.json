@@ -340,5 +340,14 @@
     "date": "2026-07-30",
     "lat": 48.1422,
     "lon": -0.7452
+  },
+  {
+    "commune": "Lapugnoy",
+    "departement": "Pas-de-Calais",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 40,
+    "date": "2026-07-31",
+    "lat": 50.52,
+    "lon": 2.533
   }
 ]
