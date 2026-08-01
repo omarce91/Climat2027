@@ -349,5 +349,14 @@
     "date": "2026-07-31",
     "lat": 50.52,
     "lon": 2.533
+  },
+  {
+    "commune": "Monts",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 41,
+    "date": "2026-08-01",
+    "lat": 47.2723,
+    "lon": 0.6429
   }
 ]
