@@ -358,5 +358,14 @@
     "date": "2026-08-01",
     "lat": 47.2723,
     "lon": 0.6429
+  },
+  {
+    "commune": "Merlerault-le-Pin",
+    "departement": "Orne",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 42,
+    "date": "2026-08-02",
+    "lat": 48.695,
+    "lon": 0.2669
   }
 ]
