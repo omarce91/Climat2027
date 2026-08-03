@@ -367,5 +367,14 @@
     "date": "2026-08-02",
     "lat": 48.695,
     "lon": 0.2669
+  },
+  {
+    "commune": "Saint-Selve",
+    "departement": "Gironde",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 43,
+    "date": "2026-08-03",
+    "lat": 44.6574,
+    "lon": -0.4726
   }
 ]
