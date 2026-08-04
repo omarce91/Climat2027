@@ -376,5 +376,14 @@
     "date": "2026-08-03",
     "lat": 44.6574,
     "lon": -0.4726
+  },
+  {
+    "commune": "Sault-de-Navailles",
+    "departement": "Pyrénées-Atlantiques",
+    "type": "inondations et coulées de boue",
+    "day": 44,
+    "date": "2026-08-04",
+    "lat": 43.5387,
+    "lon": -0.6705
   }
 ]
