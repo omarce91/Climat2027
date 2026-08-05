@@ -385,5 +385,14 @@
     "date": "2026-08-04",
     "lat": 43.5387,
     "lon": -0.6705
+  },
+  {
+    "commune": "Saint-Caprais-de-Bordeaux",
+    "departement": "Gironde",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 45,
+    "date": "2026-08-05",
+    "lat": 44.7544,
+    "lon": -0.4262
   }
 ]
