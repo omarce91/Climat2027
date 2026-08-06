@@ -394,5 +394,14 @@
     "date": "2026-08-05",
     "lat": 44.7544,
     "lon": -0.4262
+  },
+  {
+    "commune": "Romillé",
+    "departement": "Ille-et-Vilaine",
+    "type": "inondations et coulées de boue",
+    "day": 46,
+    "date": "2026-08-06",
+    "lat": 48.2272,
+    "lon": -1.874
   }
 ]
