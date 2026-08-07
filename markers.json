@@ -403,5 +403,14 @@
     "date": "2026-08-06",
     "lat": 48.2272,
     "lon": -1.874
+  },
+  {
+    "commune": "Saint-Pardoux-Soutiers",
+    "departement": "Deux-Sèvres",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 47,
+    "date": "2026-08-07",
+    "lat": 46.5738,
+    "lon": -0.3049
   }
 ]
