@@ -412,5 +412,14 @@
     "date": "2026-08-07",
     "lat": 46.5738,
     "lon": -0.3049
+  },
+  {
+    "commune": "Brive-la-Gaillarde",
+    "departement": "Corrèze",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 48,
+    "date": "2026-08-08",
+    "lat": 45.145,
+    "lon": 1.5144
   }
 ]
