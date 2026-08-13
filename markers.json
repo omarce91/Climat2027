@@ -457,5 +457,14 @@
     "date": "2026-08-12",
     "lat": 46.0899,
     "lon": 6.536
+  },
+  {
+    "commune": "Louans",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 53,
+    "date": "2026-08-13",
+    "lat": 47.181,
+    "lon": 0.739
   }
 ]
