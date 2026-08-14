@@ -466,5 +466,14 @@
     "date": "2026-08-13",
     "lat": 47.181,
     "lon": 0.739
+  },
+  {
+    "commune": "Saint-Germain-des-Bois",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 54,
+    "date": "2026-08-14",
+    "lat": 46.8858,
+    "lon": 2.4496
   }
 ]
