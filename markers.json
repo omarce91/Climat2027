@@ -475,5 +475,14 @@
     "date": "2026-08-14",
     "lat": 46.8858,
     "lon": 2.4496
+  },
+  {
+    "commune": "Plouescat",
+    "departement": "Finistère",
+    "type": "inondations et coulées de boue",
+    "day": 55,
+    "date": "2026-08-15",
+    "lat": 48.6676,
+    "lon": -4.1851
   }
 ]
