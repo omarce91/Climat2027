@@ -484,5 +484,14 @@
     "date": "2026-08-15",
     "lat": 48.6676,
     "lon": -4.1851
+  },
+  {
+    "commune": "Castétis",
+    "departement": "Pyrénées-Atlantiques",
+    "type": "inondations et coulées de boue",
+    "day": 56,
+    "date": "2026-08-16",
+    "lat": 43.4776,
+    "lon": -0.7211
   }
 ]
