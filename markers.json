@@ -493,5 +493,14 @@
     "date": "2026-08-16",
     "lat": 43.4776,
     "lon": -0.7211
+  },
+  {
+    "commune": "Aschbach",
+    "departement": "Bas-Rhin",
+    "type": "inondations et coulées de boue",
+    "day": 57,
+    "date": "2026-08-17",
+    "lat": 48.9411,
+    "lon": 7.9789
   }
 ]
