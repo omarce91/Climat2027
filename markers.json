@@ -502,5 +502,14 @@
     "date": "2026-08-17",
     "lat": 48.9411,
     "lon": 7.9789
+  },
+  {
+    "commune": "Chasseneuil",
+    "departement": "Indre",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 58,
+    "date": "2026-08-18",
+    "lat": 46.6578,
+    "lon": 1.4906
   }
 ]
