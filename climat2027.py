@@ -522,14 +522,14 @@ def post_gaspar_map(client, client_utils,
     noms = sorted({c["commune"] for c in communes_jour})
     if n_jour == 1:
         intro  = f"1 ville sinistrée un {date_str} depuis 2022 : {noms[0]}."
-        maire  = "M. ou Mme le Maire, parrainerez-vous une candidature pour la #présidentielle2027 ?"
+        maire  = "M. ou Mme le Maire, parrainerez-vous une candidature pour le climat à la #présidentielle2027 ?"
     elif n_jour == 2:
         intro  = f"2 villes sinistrées un {date_str} depuis 2022 : {noms[0]} et {noms[1]}."
-        maire  = "M. ou Mme les Maires, parrainerez-vous une candidature pour la #présidentielle2027 ?"
+        maire  = "M. ou Mme les Maires, parrainerez-vous une candidature  pour le climat à la #présidentielle2027 ?"
     else:
         s      = 's' if n_jour > 1 else ''
         intro  = f"{n_jour} ville{s} sinistrée{s} un {date_str} depuis 2022."
-        maire  = "M. ou Mme les Maires, parrainerez-vous une candidature pour la #présidentielle2027 ?"
+        maire  = "M. ou Mme les Maires, parrainerez-vous une candidature  pour le climat à la #présidentielle2027 ?"
 
     POST_TEXT = f"{intro} {maire}\n#CommunesSinistreesDuJour #Climat2027"
 
