@@ -520,5 +520,14 @@
     "date": "2026-08-19",
     "lat": 44.835,
     "lon": 0.5512
+  },
+  {
+    "commune": "Neuvy-le-Barrois",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 60,
+    "date": "2026-08-20",
+    "lat": 46.8627,
+    "lon": 3.0154
   }
 ]
