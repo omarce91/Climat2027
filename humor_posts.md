@@ -158,3 +158,67 @@ Le blabla des politiques sur le climat commence à échauffer l'atmosphère de v
 #Climat2027 #présidentielle2027 #presidentielle2027
 
 ---
+
+Votre grand-mère fait pousser des cactus dans son potager ? Le climat s’invite à votre débat #Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+Votre jardin ressemble à un désert avant l'été ? Le climat exige un débat.
+#Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+Votre GPS vous envoie en "zone inondable" ? Le climat a un message urgent pour vous. #Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+Votre toiture a pris feu avant même l’été ? Le climat mérite un mandat. #Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+On a mis l'homme sur la lune en 1969. En 2027 on ne saurait pas trouver un candidat pour mettre le climat dans un débat présidentiel ?
+#Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+Votre jardin ressemble à une zone de guerre depuis le mois de juin ? Le climat cherche un candidat qui lui rende justice en 2027.
+#Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+L'eau du lac où vous nagiez enfant est désormais interdite à la baignade en août ? Le climat n'attend pas 2027, mais 2027 peut encore changer quelque chose.
+#Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+Votre chat a troqué sa gamelle contre un ventilateur ? Le climat a un message pour vous. #Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+Votre mairie a interdit les feux d'artifice du 14 juillet à cause du risque incendie ? Elle a peut-être un avis sur la candidature climatique de 2027.
+#Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+Votre chat ronronne en plein mois d’août ? Le climat vient squatter l’Élysée #Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+Aucun candidat déclaré à la présidentielle 2027 ne place le climat en priorité absolue. Ça s'appelle une opportunité.
+#Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+Le prochain président sera élu pour 5 ans. Les décisions climatiques de ces 5 ans engagent 30 ans. Faites le calcul.
+#Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+Votre beaujolais a le goût des feux de forêt ? Le climat mérite un candidat #Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+l faut 500 parrainages d'élus pour se présenter à la présidentielle. 500 maires de communes sinistrées, ça fait combien dans vos contacts ?
+#Climat2027 #présidentielle2027 #presidentielle2027
+
+---
