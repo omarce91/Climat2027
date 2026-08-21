@@ -529,5 +529,14 @@
     "date": "2026-08-20",
     "lat": 46.8627,
     "lon": 3.0154
+  },
+  {
+    "commune": "Mont-Bernanchon",
+    "departement": "Pas-de-Calais",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 61,
+    "date": "2026-08-21",
+    "lat": 50.5888,
+    "lon": 2.5969
   }
 ]
