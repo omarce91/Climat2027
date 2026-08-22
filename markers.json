@@ -538,5 +538,14 @@
     "date": "2026-08-21",
     "lat": 50.5888,
     "lon": 2.5969
+  },
+  {
+    "commune": "Loye-sur-Arnon",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 62,
+    "date": "2026-08-22",
+    "lat": 46.6338,
+    "lon": 2.402
   }
 ]
