@@ -547,5 +547,14 @@
     "date": "2026-08-22",
     "lat": 46.6338,
     "lon": 2.402
+  },
+  {
+    "commune": "Marçais",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 63,
+    "date": "2026-08-23",
+    "lat": 46.7024,
+    "lon": 2.3519
   }
 ]
