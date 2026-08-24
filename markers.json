@@ -556,5 +556,14 @@
     "date": "2026-08-23",
     "lat": 46.7024,
     "lon": 2.3519
+  },
+  {
+    "commune": "Saint-Léger-le-Petit",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 64,
+    "date": "2026-08-24",
+    "lat": 47.1151,
+    "lon": 2.9986
   }
 ]
