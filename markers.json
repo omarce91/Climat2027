@@ -565,5 +565,14 @@
     "date": "2026-08-24",
     "lat": 47.1151,
     "lon": 2.9986
+  },
+  {
+    "commune": "Beffes",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 65,
+    "date": "2026-08-25",
+    "lat": 47.0931,
+    "lon": 2.9991
   }
 ]
