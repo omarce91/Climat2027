@@ -574,5 +574,14 @@
     "date": "2026-08-25",
     "lat": 47.0931,
     "lon": 2.9991
+  },
+  {
+    "commune": "Sainte-Croix",
+    "departement": "Dordogne",
+    "type": "inondations et coulées de boue",
+    "day": 66,
+    "date": "2026-08-26",
+    "lat": 44.4115,
+    "lon": 1.9642
   }
 ]
