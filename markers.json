@@ -583,5 +583,14 @@
     "date": "2026-08-26",
     "lat": 44.4115,
     "lon": 1.9642
+  },
+  {
+    "commune": "Noyales",
+    "departement": "Aisne",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 67,
+    "date": "2026-08-27",
+    "lat": 49.9056,
+    "lon": 3.5367
   }
 ]
