@@ -592,5 +592,14 @@
     "date": "2026-08-27",
     "lat": 49.9056,
     "lon": 3.5367
+  },
+  {
+    "commune": "Barbezières",
+    "departement": "Charente",
+    "type": "inondations et coulées de boue",
+    "day": 68,
+    "date": "2026-08-28",
+    "lat": 45.9121,
+    "lon": -0.0893
   }
 ]
