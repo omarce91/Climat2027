@@ -601,5 +601,14 @@
     "date": "2026-08-28",
     "lat": 45.9121,
     "lon": -0.0893
+  },
+  {
+    "commune": "Floirac",
+    "departement": "Gironde",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 69,
+    "date": "2026-08-29",
+    "lat": 44.8322,
+    "lon": -0.5215
   }
 ]
