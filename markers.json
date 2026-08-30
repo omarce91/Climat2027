@@ -610,5 +610,14 @@
     "date": "2026-08-29",
     "lat": 44.8322,
     "lon": -0.5215
+  },
+  {
+    "commune": "La Balme-de-Sillingy",
+    "departement": "Haute-Savoie",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 70,
+    "date": "2026-08-30",
+    "lat": 45.9648,
+    "lon": 6.0423
   }
 ]
