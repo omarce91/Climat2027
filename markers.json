@@ -619,5 +619,14 @@
     "date": "2026-08-30",
     "lat": 45.9648,
     "lon": 6.0423
+  },
+  {
+    "commune": "Oberrœdern",
+    "departement": "Bas-Rhin",
+    "type": "inondations et coulées de boue",
+    "day": 71,
+    "date": "2026-08-31",
+    "lat": 48.9278,
+    "lon": 7.9693
   }
 ]
