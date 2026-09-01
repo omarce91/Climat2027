@@ -628,5 +628,14 @@
     "date": "2026-08-31",
     "lat": 48.9278,
     "lon": 7.9693
+  },
+  {
+    "commune": "La Celle-Condé",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 72,
+    "date": "2026-09-01",
+    "lat": 46.7873,
+    "lon": 2.181
   }
 ]
