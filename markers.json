@@ -637,5 +637,14 @@
     "date": "2026-09-01",
     "lat": 46.7873,
     "lon": 2.181
+  },
+  {
+    "commune": "Salins",
+    "departement": "Cantal",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 73,
+    "date": "2026-09-02",
+    "lat": 45.1906,
+    "lon": 2.4029
   }
 ]
