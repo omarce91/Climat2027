@@ -646,5 +646,14 @@
     "date": "2026-09-02",
     "lat": 45.1906,
     "lon": 2.4029
+  },
+  {
+    "commune": "Jussy-le-Chaudrier",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 74,
+    "date": "2026-09-03",
+    "lat": 47.1181,
+    "lon": 2.934
   }
 ]
