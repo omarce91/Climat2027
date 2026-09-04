@@ -655,5 +655,14 @@
     "date": "2026-09-03",
     "lat": 47.1181,
     "lon": 2.934
+  },
+  {
+    "commune": "Souillac",
+    "departement": "Lot",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 75,
+    "date": "2026-09-04",
+    "lat": 44.9144,
+    "lon": 1.465
   }
 ]
