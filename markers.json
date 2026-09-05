@@ -664,5 +664,14 @@
     "date": "2026-09-04",
     "lat": 44.9144,
     "lon": 1.465
+  },
+  {
+    "commune": "Saint-Maixant",
+    "departement": "Gironde",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 76,
+    "date": "2026-09-05",
+    "lat": 44.5815,
+    "lon": -0.2481
   }
 ]
