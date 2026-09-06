@@ -673,5 +673,14 @@
     "date": "2026-09-05",
     "lat": 44.5815,
     "lon": -0.2481
+  },
+  {
+    "commune": "Truyes",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 77,
+    "date": "2026-09-06",
+    "lat": 47.2876,
+    "lon": 0.8535
   }
 ]
