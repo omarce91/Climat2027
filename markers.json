@@ -682,5 +682,14 @@
     "date": "2026-09-06",
     "lat": 47.2876,
     "lon": 0.8535
+  },
+  {
+    "commune": "Saint-Martin-d'Ary",
+    "departement": "Charente-Maritime",
+    "type": "inondations et coulées de boue",
+    "day": 78,
+    "date": "2026-09-07",
+    "lat": 45.2179,
+    "lon": -0.2006
   }
 ]
