@@ -700,5 +700,14 @@
     "date": "2026-09-08",
     "lat": 47.0135,
     "lon": -0.2278
+  },
+  {
+    "commune": "Luché-Thouarsais",
+    "departement": "Deux-Sèvres",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 80,
+    "date": "2026-09-09",
+    "lat": 46.9132,
+    "lon": -0.305
   }
 ]
