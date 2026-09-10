@@ -709,5 +709,14 @@
     "date": "2026-09-09",
     "lat": 46.9132,
     "lon": -0.305
+  },
+  {
+    "commune": "Ourouer-les-Bourdelins",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 81,
+    "date": "2026-09-10",
+    "lat": 46.9175,
+    "lon": 2.7915
   }
 ]
