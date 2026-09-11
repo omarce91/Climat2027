@@ -718,5 +718,14 @@
     "date": "2026-09-10",
     "lat": 46.9175,
     "lon": 2.7915
+  },
+  {
+    "commune": "Manthelan",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 82,
+    "date": "2026-09-11",
+    "lat": 47.1376,
+    "lon": 0.8201
   }
 ]
