@@ -727,5 +727,14 @@
     "date": "2026-09-11",
     "lat": 47.1376,
     "lon": 0.8201
+  },
+  {
+    "commune": "Montbazon",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 83,
+    "date": "2026-09-12",
+    "lat": 47.2847,
+    "lon": 0.7046
   }
 ]
