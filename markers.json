@@ -736,5 +736,14 @@
     "date": "2026-09-12",
     "lat": 47.2847,
     "lon": 0.7046
+  },
+  {
+    "commune": "Irodouër",
+    "departement": "Ille-et-Vilaine",
+    "type": "inondations et coulées de boue",
+    "day": 84,
+    "date": "2026-09-13",
+    "lat": 48.2433,
+    "lon": -1.9497
   }
 ]
