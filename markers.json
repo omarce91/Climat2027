@@ -745,5 +745,14 @@
     "date": "2026-09-13",
     "lat": 48.2433,
     "lon": -1.9497
+  },
+  {
+    "commune": "Faux",
+    "departement": "Dordogne",
+    "type": "inondations et coulées de boue",
+    "day": 85,
+    "date": "2026-09-14",
+    "lat": 44.7853,
+    "lon": 0.6463
   }
 ]
