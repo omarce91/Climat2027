@@ -763,5 +763,14 @@
     "date": "2026-09-15",
     "lat": 47.8993,
     "lon": 0.1163
+  },
+  {
+    "commune": "Stundwiller",
+    "departement": "Bas-Rhin",
+    "type": "inondations et coulées de boue",
+    "day": 87,
+    "date": "2026-09-16",
+    "lat": 48.9243,
+    "lon": 7.9979
   }
 ]
