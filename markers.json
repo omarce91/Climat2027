@@ -781,5 +781,14 @@
     "date": "2026-09-17",
     "lat": 46.8078,
     "lon": 2.2455
+  },
+  {
+    "commune": "La Roche-Neuville",
+    "departement": "Mayenne",
+    "type": "inondations et coulées de boue",
+    "day": 89,
+    "date": "2026-09-18",
+    "lat": 47.8773,
+    "lon": -0.7363
   }
 ]
