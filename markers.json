@@ -790,5 +790,14 @@
     "date": "2026-09-18",
     "lat": 47.8773,
     "lon": -0.7363
+  },
+  {
+    "commune": "Cœur de Causse",
+    "departement": "Lot",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 90,
+    "date": "2026-09-19",
+    "lat": 44.6441,
+    "lon": 1.604
   }
 ]
