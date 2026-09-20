@@ -799,5 +799,14 @@
     "date": "2026-09-19",
     "lat": 44.6441,
     "lon": 1.604
+  },
+  {
+    "commune": "Notre-Dame-de-Monts",
+    "departement": "Vendée",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 91,
+    "date": "2026-09-20",
+    "lat": 46.8398,
+    "lon": -2.103
   }
 ]
