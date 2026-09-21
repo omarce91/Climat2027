@@ -808,5 +808,14 @@
     "date": "2026-09-20",
     "lat": 46.8398,
     "lon": -2.103
+  },
+  {
+    "commune": "Saint-Pierre-de-Mons",
+    "departement": "Gironde",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 92,
+    "date": "2026-09-21",
+    "lat": 44.5433,
+    "lon": -0.2172
   }
 ]
