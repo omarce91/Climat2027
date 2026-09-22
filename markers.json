@@ -817,5 +817,14 @@
     "date": "2026-09-21",
     "lat": 44.5433,
     "lon": -0.2172
+  },
+  {
+    "commune": "Meillant",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 93,
+    "date": "2026-09-22",
+    "lat": 46.7897,
+    "lon": 2.506
   }
 ]
