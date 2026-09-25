@@ -844,5 +844,14 @@
     "date": "2026-09-24",
     "lat": 48.1247,
     "lon": -2.9614
+  },
+  {
+    "commune": "Saint-Varent",
+    "departement": "Deux-Sèvres",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 96,
+    "date": "2026-09-25",
+    "lat": 46.8913,
+    "lon": -0.2199
   }
 ]
