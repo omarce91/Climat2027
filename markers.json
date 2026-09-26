@@ -853,5 +853,14 @@
     "date": "2026-09-25",
     "lat": 46.8913,
     "lon": -0.2199
+  },
+  {
+    "commune": "Le Vigan",
+    "departement": "Lot",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 97,
+    "date": "2026-09-26",
+    "lat": 44.7403,
+    "lon": 1.4534
   }
 ]
