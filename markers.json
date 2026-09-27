@@ -862,5 +862,14 @@
     "date": "2026-09-26",
     "lat": 44.7403,
     "lon": 1.4534
+  },
+  {
+    "commune": "Sallespisse",
+    "departement": "Pyrénées-Atlantiques",
+    "type": "inondations et coulées de boue",
+    "day": 98,
+    "date": "2026-09-27",
+    "lat": 43.5223,
+    "lon": -0.7163
   }
 ]
