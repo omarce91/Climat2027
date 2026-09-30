@@ -889,5 +889,14 @@
     "date": "2026-09-29",
     "lat": 43.4624,
     "lon": -0.7414
+  },
+  {
+    "commune": "Guégon",
+    "departement": "Morbihan",
+    "type": "inondations et coulées de boue",
+    "day": 101,
+    "date": "2026-09-30",
+    "lat": 47.925,
+    "lon": -2.5903
   }
 ]
