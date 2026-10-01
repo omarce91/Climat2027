@@ -898,5 +898,14 @@
     "date": "2026-09-30",
     "lat": 47.925,
     "lon": -2.5903
+  },
+  {
+    "commune": "Pont-Aven",
+    "departement": "Finistère",
+    "type": "inondations et coulées de boue",
+    "day": 102,
+    "date": "2026-10-01",
+    "lat": 47.8742,
+    "lon": -3.7651
   }
 ]
