@@ -907,5 +907,14 @@
     "date": "2026-10-01",
     "lat": 47.8742,
     "lon": -3.7651
+  },
+  {
+    "commune": "Civray-de-Touraine",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 103,
+    "date": "2026-10-02",
+    "lat": 47.3325,
+    "lon": 1.0408
   }
 ]
