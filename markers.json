@@ -916,5 +916,14 @@
     "date": "2026-10-02",
     "lat": 47.3325,
     "lon": 1.0408
+  },
+  {
+    "commune": "Bonnetan",
+    "departement": "Gironde",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 104,
+    "date": "2026-10-03",
+    "lat": 44.8207,
+    "lon": -0.4091
   }
 ]
