@@ -28,9 +28,14 @@ Pré-requis
 
 credentials.json (ne jamais commiter ce fichier) :
     {
-        "handle": "climat2027.bsky.social",
-        "app_password": "xxxx-xxxx-xxxx-xxxx"
+        "handle":           "omarce.bsky.social",
+        "app_password":     "xxxx-xxxx-xxxx-xxxx",
+        "handle_c27":       "climat2027.bsky.social",
+        "app_password_c27": "xxxx-xxxx-xxxx-xxxx"
     }
+    Rôles :
+      omarce        → likes, humor posts, reposts de climat2027
+      climat2027    → posts communes, cartes GASPAR, replies aux likes
 
 ----------------------------------------------------------------------
 Usage
@@ -77,14 +82,56 @@ def load_credentials(config_file: Path) -> tuple[str, str, str | None, str | Non
         data = json.loads(config_file.read_text(encoding="utf-8"))
     except json.JSONDecodeError as e:
         sys.exit(f"Fichier d'identifiants invalide : {e}")
-    handle = data.get("handle")
+    handle       = data.get("handle")
     app_password = data.get("app_password")
     if not handle or not app_password:
         sys.exit("credentials.json doit contenir 'handle' et 'app_password'.")
-    map_url         = data.get("map_url") or None
-    mistral_api_key = data.get("mistral_api_key") or None
-    return handle, app_password, map_url, mistral_api_key
+    handle_c27       = data.get("handle_c27") or None
+    app_password_c27 = data.get("app_password_c27") or None
+    map_url          = data.get("map_url") or None
+    mistral_api_key  = data.get("mistral_api_key") or None
+    return handle, app_password, handle_c27, app_password_c27, map_url, mistral_api_key
 
+
+
+
+# ─────────────────────────────────────────────────────────────────────
+# Deux comptes Bluesky : omarce (likes/humor) et climat2027 (posts/replies)
+# ─────────────────────────────────────────────────────────────────────
+
+def _login_clients(handle: str, app_password: str,
+                   handle_c27: str | None = None,
+                   app_password_c27: str | None = None):
+    """Connecte les deux clients Bluesky.
+
+    client_omarce : lit les likes d'omarce, poste les messages humor
+    client_c27    : poste les communes, cartes GASPAR et replies aux likes
+    Si les credentials c27 sont absents, les deux clients pointent vers omarce.
+    """
+    from atproto import Client
+    client_omarce = Client()
+    client_omarce.login(handle, app_password)
+    if handle_c27 and app_password_c27:
+        client_c27 = Client()
+        client_c27.login(handle_c27, app_password_c27)
+        print(f"  Connecté : {handle} (omarce) + {handle_c27} (climat2027)")
+    else:
+        client_c27 = client_omarce
+        print(f"  [avertissement] Pas de compte climat2027 configuré — c27 = omarce")
+    return client_omarce, client_c27
+
+
+def _repost_omarce(client_omarce, result, label: str = "post") -> None:
+    """omarce.bsky.social reposte un post émis par climat2027.bsky.social."""
+    if client_omarce is None or result is None:
+        return
+    # Évite de se repost soi-même si les deux clients sont identiques
+    if getattr(client_omarce, 'me', None) and getattr(result, 'uri', None):
+        try:
+            client_omarce.repost(uri=result.uri, cid=result.cid)
+            print(f"  ↺ omarce a reposté le {label} de climat2027.")
+        except Exception as e:
+            print(f"  [repost omarce] Erreur ({label}) : {e}")
 
 def build_richtext(client_utils, text: str):
     """Hashtags et liens cliquables sur Bluesky."""
@@ -452,7 +499,7 @@ def _date_fr(d: date | None = None) -> str:
     return f"{d.day} {_MOIS_FR[d.month]}"
 
 
-def post_gaspar_map(client, client_utils,
+def post_gaspar_map(client, client_omarce, client_utils,
                     gaspar_csv: Path,
                     coords_cache_file: Path,
                     gaspar_state_file: Path | None = None,
@@ -522,14 +569,14 @@ def post_gaspar_map(client, client_utils,
     noms = sorted({c["commune"] for c in communes_jour})
     if n_jour == 1:
         intro  = f"1 ville sinistrée un {date_str} depuis 2022 : {noms[0]}."
-        maire  = "M. ou Mme le Maire, parrainerez-vous une candidature pour le climat à la #présidentielle2027 ?"
+        maire  = "M. ou Mme le Maire, parrainerez-vous une candidature pour la #présidentielle2027 ?"
     elif n_jour == 2:
         intro  = f"2 villes sinistrées un {date_str} depuis 2022 : {noms[0]} et {noms[1]}."
-        maire  = "M. ou Mme les Maires, parrainerez-vous une candidature  pour le climat à la #présidentielle2027 ?"
+        maire  = "M. ou Mme les Maires, parrainerez-vous une candidature pour la #présidentielle2027 ?"
     else:
         s      = 's' if n_jour > 1 else ''
         intro  = f"{n_jour} ville{s} sinistrée{s} un {date_str} depuis 2022."
-        maire  = "M. ou Mme les Maires, parrainerez-vous une candidature  pour le climat à la #présidentielle2027 ?"
+        maire  = "M. ou Mme les Maires, parrainerez-vous une candidature pour la #présidentielle2027 ?"
 
     POST_TEXT = f"{intro} {maire}\n#CommunesSinistreesDuJour #Climat2027"
 
@@ -561,6 +608,7 @@ def post_gaspar_map(client, client_utils,
             encoding="utf-8"
         )
         print(f"  Carte postée : {result.uri}")
+        _repost_omarce(client_omarce, result, "carte GASPAR")
     except Exception as e:
         print(f"  [carte GASPAR] Erreur lors du post ({e}).")
 
@@ -696,7 +744,7 @@ def generate_map_thumbnail(markers: list[dict],
         return None
 
 
-def run_commune_mode(args, client, client_utils, models, map_url: str | None = None) -> None:
+def run_commune_mode(args, client, client_omarce, client_utils, models, map_url: str | None = None) -> None:
     posts_file   = Path(args.commune_posts_file)
     state_file   = Path(args.commune_state_file)
     markers_file = Path(args.markers_file)
@@ -777,6 +825,7 @@ def run_commune_mode(args, client, client_utils, models, map_url: str | None = N
     state["posted_log"].append({"index": next_index, "date": today, "uri": result.uri})
     _save_commune_state(state_file, state)
     print(f"Posté : {result.uri}")
+    _repost_omarce(client_omarce, result, "post commune")
 
     # ── Réponse avec lien carte (best-effort, ne bloque jamais) ──────
     if coords and map_url:
@@ -1003,15 +1052,17 @@ def _build_reply_refs(models, post):
     return root, parent
 
 
-def run_reply_mode(args, client, posts, slogan, stats,
+def run_reply_mode(args, client, client_c27, posts, slogan, stats,
                    client_utils, models,
                    mistral_api_key: str | None = None) -> None:
+    """client     = omarce  (lecture des likes)
+       client_c27 = climat2027 (envoi des replies + repost par omarce)"""
     state_file = Path(args.humor_reply_state_file)
-    my_did     = client.me.did
+    my_did     = client_c27.me.did   # on vérifie si c27 a déjà répondu
     since_dt   = datetime.now(timezone.utc) - timedelta(hours=args.hours)
 
     print(f"Recherche des likes depuis {since_dt.isoformat()}...")
-    liked = _get_recent_likes(client, since_dt)
+    liked = _get_recent_likes(client, since_dt)   # likes d'omarce
     print(f"{len(liked)} post(s) liké(s) dans la fenêtre de {args.hours}h.")
     if mistral_api_key:
         print("  [Mistral] Sélection intelligente activée.")
@@ -1027,7 +1078,7 @@ def run_reply_mode(args, client, posts, slogan, stats,
             break
         uri = subject["uri"]
         try:
-            res = client.get_post_thread(uri=uri, depth=1)
+            res = client.get_post_thread(uri=uri, depth=1)   # lecture via omarce
             thread_post = res.thread.post
         except Exception as e:
             print(f"  [ignoré] {uri} ({e})")
@@ -1060,8 +1111,8 @@ def run_reply_mode(args, client, posts, slogan, stats,
         try:
             root, parent = _build_reply_refs(models, thread_post)
             reply_to     = models.AppBskyFeedPost.ReplyRef(root=root, parent=parent)
-            result_post  = client.send_post(text=build_richtext(client_utils, post_text),
-                                            reply_to=reply_to)
+            result_post  = client_c27.send_post(text=build_richtext(client_utils, post_text),
+                                               reply_to=reply_to)
         except Exception as e:
             print(f"  [erreur] {e}")
             errors += 1
@@ -1070,7 +1121,8 @@ def run_reply_mode(args, client, posts, slogan, stats,
         state["last_text"] = post_text
         _save_humor_state(state_file, state)
         sent += 1
-        print(f"  Répondu : {result_post.uri}")
+        print(f"  Répondu (climat2027) : {result_post.uri}")
+        _repost_omarce(client, result_post, "reply")   # client = omarce
 
         if args.delay > 0:
             print(f"  Pause {args.delay}s...")
@@ -1245,28 +1297,30 @@ def main():
             )
             print()
 
-        handle, app_password, cred_map_url, mistral_api_key = load_credentials(Path(args.config))
+        handle, app_password, handle_c27, app_password_c27, cred_map_url, mistral_api_key = load_credentials(Path(args.config))
         map_url = args.map_url or cred_map_url
         try:
-            from atproto import Client, client_utils, models
+            from atproto import client_utils, models
         except ImportError:
             sys.exit("pip install atproto")
-        client = Client()
-        client.login(handle, app_password)
+        client_omarce, client_c27 = _login_clients(
+            handle, app_password, handle_c27, app_password_c27
+        )
+        client = client_omarce  # alias pour refresh_stats (posts humor d'omarce)
 
         print("═" * 50)
-        print("1/3 — Post #1Jour1CommuneSinistree")
+        print("1/3 — Post #1Jour1CommuneSinistree (→ climat2027)")
         print("═" * 50)
-        run_commune_mode(args, client, client_utils, models, map_url)
+        run_commune_mode(args, client_c27, client_omarce, client_utils, models, map_url)
 
         # Carte GASPAR quotidienne (best-effort, entre étape 1 et 2)
         if args.gaspar_csv:
             print()
             print("═" * 50)
-            print("1b — Carte #CommunesSinistreesDuJour")
+            print("1b — Carte #CommunesSinistreesDuJour (→ climat2027)")
             print("═" * 50)
             post_gaspar_map(
-                client, client_utils,
+                client_c27, client_omarce, client_utils,
                 gaspar_csv         = Path(args.gaspar_csv),
                 coords_cache_file  = Path(args.coords_cache),
                 gaspar_state_file  = Path("gaspar_map_state.json"),
@@ -1298,21 +1352,22 @@ def main():
         print("═" * 50)
         print("3/3 — Réponses aux likes récents")
         print("═" * 50)
-        run_reply_mode(args, client, posts, slogan, stats, client_utils, models,
-                       mistral_api_key=mistral_api_key)
+        run_reply_mode(args, client_omarce, client_c27, posts, slogan, stats,
+                       client_utils, models, mistral_api_key=mistral_api_key)
         return
 
     # ── Mode commune seul ─────────────────────────────────────────────
     if args.mode == "commune":
-        handle, app_password, cred_map_url, _ = load_credentials(Path(args.config))
+        handle, app_password, handle_c27, app_password_c27, cred_map_url, _ = load_credentials(Path(args.config))
         map_url = args.map_url or cred_map_url
         try:
-            from atproto import Client, client_utils, models
+            from atproto import client_utils, models
         except ImportError:
             sys.exit("pip install atproto")
-        client = Client()
-        client.login(handle, app_password)
-        run_commune_mode(args, client, client_utils, models, map_url)
+        client_omarce, client_c27 = _login_clients(
+            handle, app_password, handle_c27, app_password_c27
+        )
+        run_commune_mode(args, client_c27, client_omarce, client_utils, models, map_url)
         return
 
     # ── Modes post / reply / propose / stats-only ─────────────────────
@@ -1325,13 +1380,15 @@ def main():
     if not posts:
         sys.exit(f"Aucun message trouvé dans {args.humor_posts_file}.")
 
-    handle, app_password, _, mistral_api_key = load_credentials(Path(args.config))
+    handle, app_password, handle_c27, app_password_c27, _, mistral_api_key = load_credentials(Path(args.config))
     try:
-        from atproto import Client, client_utils, models
+        from atproto import client_utils, models
     except ImportError:
         sys.exit("pip install atproto")
-    client = Client()
-    client.login(handle, app_password)
+    client_omarce, client_c27 = _login_clients(
+        handle, app_password, handle_c27, app_password_c27
+    )
+    client = client_omarce   # humor posts et stats → omarce
 
     # ── Mode propose (interactif, local uniquement) ───────────────────
     if args.mode == "propose":
@@ -1358,8 +1415,8 @@ def main():
     if args.mode == "post":
         run_post_mode(args, client, posts, slogan, stats, client_utils)
     else:
-        run_reply_mode(args, client, posts, slogan, stats, client_utils, models,
-                       mistral_api_key=mistral_api_key)
+        run_reply_mode(args, client_omarce, client_c27, posts, slogan, stats,
+                       client_utils, models, mistral_api_key=mistral_api_key)
 
     if args.show_stats:
         print_stats(posts, slogan, _load_stats(Path(args.stats_file)))

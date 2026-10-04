@@ -1,46 +1,144 @@
-name: Climat2027 — post quotidien
+name: Climat2027 — posts quotidiens
 
 on:
   schedule:
-    - cron: '0 8 * * *'   # tous les jours à 8h UTC (10h heure de Paris)
-  workflow_dispatch:        # permet de lancer manuellement depuis Actions
+    - cron: '0 7 * * *'    # 7h UTC = 9h Paris (été)
+    - cron: '0 8 * * *'    # 8h UTC = 9h Paris (hiver)
+    - cron: '0 11 * * *'   # 11h UTC = 13h Paris (été)
+    - cron: '0 12 * * *'   # 12h UTC = 13h Paris (hiver)
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Mode (all, carte_gaspar, linkedin)'
+        required: false
+        default: 'all'
 
 permissions:
-  contents: write   # nécessaire pour commiter state.json, markers.json, etc.
+  contents: write
 
 jobs:
-  post:
+  # ── Job 1 : 9h — Bluesky commune + stats + likes ──────────────────
+  post_quotidien:
+    if: >
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'all')
+      || (github.event_name == 'schedule' && (github.event.schedule == '0 7 * * *' || github.event.schedule == '0 8 * * *'))
     runs-on: ubuntu-latest
     steps:
-      - name: Récupère le dépôt
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Installe Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
       - name: Installe les dépendances
         run: pip install -r requirements.txt
 
-      - name: Crée credentials.json depuis les secrets GitHub
+      - name: Crée credentials.json
         run: |
           cat > credentials.json << CREDS
           {
-            "handle": "${{ secrets.BSKY_HANDLE }}",
-            "app_password": "${{ secrets.BSKY_APP_PASSWORD }}"
+            "handle":                 "${{ secrets.BSKY_HANDLE }}",
+            "app_password":           "${{ secrets.BSKY_APP_PASSWORD }}",
+            "handle_c27":             "${{ secrets.BSKY_C27_HANDLE }}",
+            "app_password_c27":       "${{ secrets.BSKY_C27_APP_PASSWORD }}",
+            "mistral_api_key":        "${{ secrets.MISTRAL_API_KEY }}",
+            "linkedin_access_token":  "${{ secrets.LINKEDIN_ACCESS_TOKEN }}",
+            "linkedin_person_id":     "${{ secrets.LINKEDIN_PERSON_ID }}"
           }
           CREDS
 
-      - name: Lance le script principal
-        run: python climat2027.py
+      - name: Bluesky — post commune + stats + likes
+        run: |
+          python climat2027.py \
+            --map-url "${{ vars.MAP_URL || 'https://omarce91.github.io/Climat2027/' }}"
 
-      - name: Sauvegarde les fichiers d'état et la carte
+      - name: LinkedIn — post commune
+        run: python linkedin.py --mode commune
+        continue-on-error: true   # ne bloque pas si LinkedIn échoue
+
+      - name: Sauvegarde les fichiers d'état
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add state.json markers.json humor_state.json \
-                  humor_reply_state.json humor_stats.json
+                  humor_reply_state.json humor_stats.json \
+                  commune_coords_cache.json gaspar_map_state.json \
+                  linkedin_state.json || true
           git diff --cached --quiet || \
             git commit -m "Post automatique $(date +%F)"
+          git push
+
+  # ── Job 2 : 13h — Bluesky + LinkedIn carte GASPAR ─────────────────
+  carte_gaspar:
+    if: >
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'carte_gaspar')
+      || (github.event_name == 'schedule' && (github.event.schedule == '0 11 * * *' || github.event.schedule == '0 12 * * *'))
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Installe les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Crée credentials.json
+        run: |
+          cat > credentials.json << CREDS
+          {
+            "handle":                 "${{ secrets.BSKY_HANDLE }}",
+            "app_password":           "${{ secrets.BSKY_APP_PASSWORD }}",
+            "handle_c27":             "${{ secrets.BSKY_C27_HANDLE }}",
+            "app_password_c27":       "${{ secrets.BSKY_C27_APP_PASSWORD }}",
+            "linkedin_access_token":  "${{ secrets.LINKEDIN_ACCESS_TOKEN }}",
+            "linkedin_person_id":     "${{ secrets.LINKEDIN_PERSON_ID }}"
+          }
+          CREDS
+
+      - name: Bluesky — carte #CommunesSinistreesDuJour
+        run: |
+          GASPAR=$(ls catnat_gaspar*.csv 2>/dev/null | tail -1)
+          if [ -z "$GASPAR" ]; then
+            echo "Aucun CSV GASPAR — carte Bluesky ignorée."
+            exit 0
+          fi
+          python - << PYEOF
+import sys
+sys.path.insert(0, '.')
+from pathlib import Path
+from climat2027 import (
+    load_credentials, build_richtext, load_gaspar_communes,
+    build_coords_cache, generate_gaspar_map, ensure_gaspar_cache,
+    post_gaspar_map
+)
+try:
+    from atproto import Client, client_utils
+except ImportError:
+    sys.exit("pip install atproto")
+handle, app_password, _, _ = load_credentials(Path("credentials.json"))
+client = Client()
+client.login(handle, app_password)
+gaspar_csv = Path("$GASPAR")
+cache_file = Path("commune_coords_cache.json")
+ensure_gaspar_cache(gaspar_csv, cache_file)
+post_gaspar_map(client, client_utils, gaspar_csv, cache_file,
+                gaspar_state_file=Path("gaspar_map_state.json"))
+PYEOF
+
+      - name: LinkedIn — carte #CommunesSinistreesDuJour
+        run: |
+          GASPAR=$(ls catnat_gaspar*.csv 2>/dev/null | tail -1)
+          [ -n "$GASPAR" ] && python linkedin.py --mode gaspar --gaspar-csv "$GASPAR"
+        continue-on-error: true
+
+      - name: Sauvegarde les fichiers d'état
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add commune_coords_cache.json gaspar_map_state.json \
+                  linkedin_state.json || true
+          git diff --cached --quiet || \
+            git commit -m "Carte GASPAR $(date +%F)"
           git push
