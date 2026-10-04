@@ -529,5 +529,410 @@
     "date": "2026-08-20",
     "lat": 46.8627,
     "lon": 3.0154
+  },
+  {
+    "commune": "Mont-Bernanchon",
+    "departement": "Pas-de-Calais",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 61,
+    "date": "2026-08-21",
+    "lat": 50.5888,
+    "lon": 2.5969
+  },
+  {
+    "commune": "Loye-sur-Arnon",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 62,
+    "date": "2026-08-22",
+    "lat": 46.6338,
+    "lon": 2.402
+  },
+  {
+    "commune": "Marçais",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 63,
+    "date": "2026-08-23",
+    "lat": 46.7024,
+    "lon": 2.3519
+  },
+  {
+    "commune": "Saint-Léger-le-Petit",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 64,
+    "date": "2026-08-24",
+    "lat": 47.1151,
+    "lon": 2.9986
+  },
+  {
+    "commune": "Beffes",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 65,
+    "date": "2026-08-25",
+    "lat": 47.0931,
+    "lon": 2.9991
+  },
+  {
+    "commune": "Sainte-Croix",
+    "departement": "Dordogne",
+    "type": "inondations et coulées de boue",
+    "day": 66,
+    "date": "2026-08-26",
+    "lat": 44.4115,
+    "lon": 1.9642
+  },
+  {
+    "commune": "Noyales",
+    "departement": "Aisne",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 67,
+    "date": "2026-08-27",
+    "lat": 49.9056,
+    "lon": 3.5367
+  },
+  {
+    "commune": "Barbezières",
+    "departement": "Charente",
+    "type": "inondations et coulées de boue",
+    "day": 68,
+    "date": "2026-08-28",
+    "lat": 45.9121,
+    "lon": -0.0893
+  },
+  {
+    "commune": "Floirac",
+    "departement": "Gironde",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 69,
+    "date": "2026-08-29",
+    "lat": 44.8322,
+    "lon": -0.5215
+  },
+  {
+    "commune": "La Balme-de-Sillingy",
+    "departement": "Haute-Savoie",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 70,
+    "date": "2026-08-30",
+    "lat": 45.9648,
+    "lon": 6.0423
+  },
+  {
+    "commune": "Oberrœdern",
+    "departement": "Bas-Rhin",
+    "type": "inondations et coulées de boue",
+    "day": 71,
+    "date": "2026-08-31",
+    "lat": 48.9278,
+    "lon": 7.9693
+  },
+  {
+    "commune": "La Celle-Condé",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 72,
+    "date": "2026-09-01",
+    "lat": 46.7873,
+    "lon": 2.181
+  },
+  {
+    "commune": "Salins",
+    "departement": "Cantal",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 73,
+    "date": "2026-09-02",
+    "lat": 45.1906,
+    "lon": 2.4029
+  },
+  {
+    "commune": "Jussy-le-Chaudrier",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 74,
+    "date": "2026-09-03",
+    "lat": 47.1181,
+    "lon": 2.934
+  },
+  {
+    "commune": "Souillac",
+    "departement": "Lot",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 75,
+    "date": "2026-09-04",
+    "lat": 44.9144,
+    "lon": 1.465
+  },
+  {
+    "commune": "Saint-Maixant",
+    "departement": "Gironde",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 76,
+    "date": "2026-09-05",
+    "lat": 44.5815,
+    "lon": -0.2481
+  },
+  {
+    "commune": "Truyes",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 77,
+    "date": "2026-09-06",
+    "lat": 47.2876,
+    "lon": 0.8535
+  },
+  {
+    "commune": "Saint-Martin-d'Ary",
+    "departement": "Charente-Maritime",
+    "type": "inondations et coulées de boue",
+    "day": 78,
+    "date": "2026-09-07",
+    "lat": 45.2179,
+    "lon": -0.2006
+  },
+  {
+    "commune": "Sainte-Verge",
+    "departement": "Deux-Sèvres",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 79,
+    "date": "2026-09-08",
+    "lat": 47.0135,
+    "lon": -0.2278
+  },
+  {
+    "commune": "Luché-Thouarsais",
+    "departement": "Deux-Sèvres",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 80,
+    "date": "2026-09-09",
+    "lat": 46.9132,
+    "lon": -0.305
+  },
+  {
+    "commune": "Ourouer-les-Bourdelins",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 81,
+    "date": "2026-09-10",
+    "lat": 46.9175,
+    "lon": 2.7915
+  },
+  {
+    "commune": "Manthelan",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 82,
+    "date": "2026-09-11",
+    "lat": 47.1376,
+    "lon": 0.8201
+  },
+  {
+    "commune": "Montbazon",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 83,
+    "date": "2026-09-12",
+    "lat": 47.2847,
+    "lon": 0.7046
+  },
+  {
+    "commune": "Irodouër",
+    "departement": "Ille-et-Vilaine",
+    "type": "inondations et coulées de boue",
+    "day": 84,
+    "date": "2026-09-13",
+    "lat": 48.2433,
+    "lon": -1.9497
+  },
+  {
+    "commune": "Faux",
+    "departement": "Dordogne",
+    "type": "inondations et coulées de boue",
+    "day": 85,
+    "date": "2026-09-14",
+    "lat": 44.7853,
+    "lon": 0.6463
+  },
+  {
+    "commune": "Fillé",
+    "departement": "Sarthe",
+    "type": "inondations et coulées de boue",
+    "day": 86,
+    "date": "2026-09-15",
+    "lat": 47.8993,
+    "lon": 0.1163
+  },
+  {
+    "commune": "Stundwiller",
+    "departement": "Bas-Rhin",
+    "type": "inondations et coulées de boue",
+    "day": 87,
+    "date": "2026-09-16",
+    "lat": 48.9243,
+    "lon": 7.9979
+  },
+  {
+    "commune": "Montlouis",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 88,
+    "date": "2026-09-17",
+    "lat": 46.8078,
+    "lon": 2.2455
+  },
+  {
+    "commune": "La Roche-Neuville",
+    "departement": "Mayenne",
+    "type": "inondations et coulées de boue",
+    "day": 89,
+    "date": "2026-09-18",
+    "lat": 47.8773,
+    "lon": -0.7363
+  },
+  {
+    "commune": "Cœur de Causse",
+    "departement": "Lot",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 90,
+    "date": "2026-09-19",
+    "lat": 44.6441,
+    "lon": 1.604
+  },
+  {
+    "commune": "Notre-Dame-de-Monts",
+    "departement": "Vendée",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 91,
+    "date": "2026-09-20",
+    "lat": 46.8398,
+    "lon": -2.103
+  },
+  {
+    "commune": "Saint-Pierre-de-Mons",
+    "departement": "Gironde",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 92,
+    "date": "2026-09-21",
+    "lat": 44.5433,
+    "lon": -0.2172
+  },
+  {
+    "commune": "Meillant",
+    "departement": "Cher",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 93,
+    "date": "2026-09-22",
+    "lat": 46.7897,
+    "lon": 2.506
+  },
+  {
+    "commune": "Viozan",
+    "departement": "Gers",
+    "type": "inondations et coulées de boue",
+    "day": 94,
+    "date": "2026-09-23",
+    "lat": 43.3966,
+    "lon": 0.4672
+  },
+  {
+    "commune": "Neulliac",
+    "departement": "Morbihan",
+    "type": "inondations et coulées de boue",
+    "day": 95,
+    "date": "2026-09-24",
+    "lat": 48.1247,
+    "lon": -2.9614
+  },
+  {
+    "commune": "Saint-Varent",
+    "departement": "Deux-Sèvres",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 96,
+    "date": "2026-09-25",
+    "lat": 46.8913,
+    "lon": -0.2199
+  },
+  {
+    "commune": "Le Vigan",
+    "departement": "Lot",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 97,
+    "date": "2026-09-26",
+    "lat": 44.7403,
+    "lon": 1.4534
+  },
+  {
+    "commune": "Sallespisse",
+    "departement": "Pyrénées-Atlantiques",
+    "type": "inondations et coulées de boue",
+    "day": 98,
+    "date": "2026-09-27",
+    "lat": 43.5223,
+    "lon": -0.7163
+  },
+  {
+    "commune": "Castels et Bézenac",
+    "departement": "Dordogne",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 99,
+    "date": "2026-09-28",
+    "lat": 44.8647,
+    "lon": 1.0841
+  },
+  {
+    "commune": "Biron",
+    "departement": "Pyrénées-Atlantiques",
+    "type": "inondations et coulées de boue",
+    "day": 100,
+    "date": "2026-09-29",
+    "lat": 43.4624,
+    "lon": -0.7414
+  },
+  {
+    "commune": "Guégon",
+    "departement": "Morbihan",
+    "type": "inondations et coulées de boue",
+    "day": 101,
+    "date": "2026-09-30",
+    "lat": 47.925,
+    "lon": -2.5903
+  },
+  {
+    "commune": "Pont-Aven",
+    "departement": "Finistère",
+    "type": "inondations et coulées de boue",
+    "day": 102,
+    "date": "2026-10-01",
+    "lat": 47.8742,
+    "lon": -3.7651
+  },
+  {
+    "commune": "Civray-de-Touraine",
+    "departement": "Indre-et-Loire",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 103,
+    "date": "2026-10-02",
+    "lat": 47.3325,
+    "lon": 1.0408
+  },
+  {
+    "commune": "Bonnetan",
+    "departement": "Gironde",
+    "type": "sécheresse / réhydratation des sols (RGA)",
+    "day": 104,
+    "date": "2026-10-03",
+    "lat": 44.8207,
+    "lon": -0.4091
+  },
+  {
+    "commune": "Orthez",
+    "departement": "Pyrénées-Atlantiques",
+    "type": "inondations et coulées de boue",
+    "day": 105,
+    "date": "2026-10-04",
+    "lat": 43.4945,
+    "lon": -0.7777
   }
 ]

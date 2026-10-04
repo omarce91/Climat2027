@@ -1,6 +1,6 @@
 {
-  "next_index": 60,
-  "last_posted_date": "2026-08-20",
+  "next_index": 105,
+  "last_posted_date": "2026-10-04",
   "posted_log": [
     {
       "index": 0,
@@ -301,6 +301,231 @@
       "index": 59,
       "date": "2026-08-20",
       "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mtitmcjm7j22"
+    },
+    {
+      "index": 60,
+      "date": "2026-08-21",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mtle7anryq2k"
+    },
+    {
+      "index": 61,
+      "date": "2026-08-22",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mtntzlfsex2i"
+    },
+    {
+      "index": 62,
+      "date": "2026-08-23",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mtqeix45du2m"
+    },
+    {
+      "index": 63,
+      "date": "2026-08-24",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mtsvz3f3om2c"
+    },
+    {
+      "index": 64,
+      "date": "2026-08-25",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mtvg5lcszq2g"
+    },
+    {
+      "index": 65,
+      "date": "2026-08-26",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mtxwnzclny2x"
+    },
+    {
+      "index": 66,
+      "date": "2026-08-27",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mu3j7myir727"
+    },
+    {
+      "index": 67,
+      "date": "2026-08-28",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mu65a4rkn32p"
+    },
+    {
+      "index": 68,
+      "date": "2026-08-29",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mu7yogyhmg27"
+    },
+    {
+      "index": 69,
+      "date": "2026-08-30",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mucitr4w642x"
+    },
+    {
+      "index": 70,
+      "date": "2026-08-31",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mufb23fdoy2y"
+    },
+    {
+      "index": 71,
+      "date": "2026-09-01",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3muhibut3242c"
+    },
+    {
+      "index": 72,
+      "date": "2026-09-02",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mujwxoqjff23"
+    },
+    {
+      "index": 73,
+      "date": "2026-09-03",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mumhl7orqw2k"
+    },
+    {
+      "index": 74,
+      "date": "2026-09-04",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3muoxpxkjts27"
+    },
+    {
+      "index": 75,
+      "date": "2026-09-05",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3murfbtx4fw2u"
+    },
+    {
+      "index": 76,
+      "date": "2026-09-06",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mutwthewpl2c"
+    },
+    {
+      "index": 77,
+      "date": "2026-09-07",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3muwo42iozw2e"
+    },
+    {
+      "index": 78,
+      "date": "2026-09-08",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3muyzyvujef2u"
+    },
+    {
+      "index": 79,
+      "date": "2026-09-09",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mv3ktsslbo23"
+    },
+    {
+      "index": 80,
+      "date": "2026-09-10",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mv637cmvbq2j"
+    },
+    {
+      "index": 81,
+      "date": "2026-09-11",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mvale4wovw2k"
+    },
+    {
+      "index": 82,
+      "date": "2026-09-12",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mvczpaaztg2e"
+    },
+    {
+      "index": 83,
+      "date": "2026-09-13",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mvfnxgpyyi2m"
+    },
+    {
+      "index": 84,
+      "date": "2026-09-14",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mvidv6alqh2c"
+    },
+    {
+      "index": 85,
+      "date": "2026-09-15",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mvkoypgfx523"
+    },
+    {
+      "index": 86,
+      "date": "2026-09-16",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mvn7fnnflz2t"
+    },
+    {
+      "index": 87,
+      "date": "2026-09-17",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mvppm6q5rl2j"
+    },
+    {
+      "index": 88,
+      "date": "2026-09-18",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mvs6vvkzlz2j"
+    },
+    {
+      "index": 89,
+      "date": "2026-09-19",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mvuny2frny2u"
+    },
+    {
+      "index": 90,
+      "date": "2026-09-20",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mvxafjwc2n2u"
+    },
+    {
+      "index": 91,
+      "date": "2026-09-21",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mvzxilkuar2c"
+    },
+    {
+      "index": 92,
+      "date": "2026-09-22",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mw4c3ckcni2l"
+    },
+    {
+      "index": 93,
+      "date": "2026-09-23",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mw6th43h3w25"
+    },
+    {
+      "index": 94,
+      "date": "2026-09-24",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mwbdesw6ba23"
+    },
+    {
+      "index": 95,
+      "date": "2026-09-25",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mwdu22sv2z25"
+    },
+    {
+      "index": 96,
+      "date": "2026-09-26",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mwgckfztu52r"
+    },
+    {
+      "index": 97,
+      "date": "2026-09-27",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mwivvmw5hg2z"
+    },
+    {
+      "index": 98,
+      "date": "2026-09-28",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mwlq5gim2s2r"
+    },
+    {
+      "index": 99,
+      "date": "2026-09-29",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mwo2hfomai2a"
+    },
+    {
+      "index": 100,
+      "date": "2026-09-30",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mwqkxknz6o2e"
+    },
+    {
+      "index": 101,
+      "date": "2026-10-01",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mwt4yd6tax2e"
+    },
+    {
+      "index": 102,
+      "date": "2026-10-02",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mwvldmqepr2a"
+    },
+    {
+      "index": 103,
+      "date": "2026-10-03",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mwxwzszuz72i"
+    },
+    {
+      "index": 104,
+      "date": "2026-10-04",
+      "uri": "at://did:plc:cgzzx3cctyc2hmoqr3nb4akb/app.bsky.feed.post/3mx2joaiifh2s"
     }
   ]
 }
