@@ -925,5 +925,14 @@
     "date": "2026-10-03",
     "lat": 44.8207,
     "lon": -0.4091
+  },
+  {
+    "commune": "Orthez",
+    "departement": "Pyrénées-Atlantiques",
+    "type": "inondations et coulées de boue",
+    "day": 105,
+    "date": "2026-10-04",
+    "lat": 43.4945,
+    "lon": -0.7777
   }
 ]
