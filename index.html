@@ -1,199 +1,356 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Communes sinistrées — #Climat2027</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<style>
-  html, body, #map { height: 100%; margin: 0; }
-
-  .info-banner {
-    position: absolute; top: 10px; left: 50px; z-index: 1000;
-    background: white; padding: 8px 14px; border-radius: 6px;
-    box-shadow: 0 1px 4px rgba(0,0,0,.3);
-    font-family: system-ui, sans-serif; font-size: 14px;
-  }
-
-  .legend {
-    background: white;
-    padding: 12px 16px;
-    border-radius: 8px;
-    box-shadow: 0 1px 5px rgba(0,0,0,.35);
-    font-family: system-ui, sans-serif;
-    font-size: 13px;
-    max-width: 250px;
-    line-height: 1.5;
-  }
-  .legend h4 {
-    margin: 0 0 8px;
-    font-size: 13px;
-    font-weight: 700;
-    color: #1a1a1a;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 6px;
-  }
-  .legend-item { display: flex; align-items: center; margin: 5px 0; }
-  .legend-dot {
-    width: 13px; height: 13px;
-    border-radius: 50%;
-    border: 2px solid rgba(0,0,0,.2);
-    margin-right: 8px; flex-shrink: 0;
-  }
-  .legend-sep { border: none; border-top: 1px solid #eee; margin: 8px 0; }
-  .legend-latest { font-size: 12px; color: #333; margin-top: 4px; }
-  .legend-latest strong { display: block; font-size: 13px; color: #111; margin-bottom: 2px; }
-  .legend-latest em { font-style: normal; color: #555; }
-
-  /* Pulsation du dernier marqueur via div icon */
-  .pulse-ring {
-    width: 30px; height: 30px;
-    border-radius: 50%;
-    border: 3px solid #FFD700;
-    animation: pulse-anim 2s ease-out infinite;
-    position: absolute;
-    top: -5px; left: -5px;
-  }
-  @keyframes pulse-anim {
-    0%   { transform: scale(0.8); opacity: 1; }
-    100% { transform: scale(2);   opacity: 0; }
-  }
-  .latest-icon {
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    border: 3px solid #FFD700;
-    position: relative;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>#Climat2027 — Les candidats face au climat</title>
+  <meta name="description" content="Comparaison des programmes des candidats déclarés concernant le climat.">
+  <meta property="og:type"         content="website">
+  <meta property="og:site_name"    content="#Climat2027">
+  <meta property="og:title"        content="#Climat2027 — Les candidats face au climat">
+  <meta property="og:description"  content="Comparaison des programmes des candidats déclarés concernant le climat.">
+  <meta property="og:url"          content="https://climat2027.fr/">
+  <meta property="og:image"        content="https://climat2027.fr/images/og_image.jpg">
+  <meta property="og:image:type"   content="image/jpeg">
+  <meta property="og:image:width"  content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt"    content="Scatter plot des candidats 2027 : atténuation vs adaptation climatique">
+  <meta property="og:locale"       content="fr_FR">
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="#Climat2027 — Les candidats face au climat">
+  <meta name="twitter:description" content="Comparaison des programmes des candidats déclarés concernant le climat.">
+  <meta name="twitter:image"       content="https://climat2027.fr/images/og_image.jpg">
+  <meta name="twitter:image:alt"   content="Scatter plot des candidats 2027 : atténuation vs adaptation climatique">
+  <link rel="canonical" href="https://climat2027.fr/">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23132218'/><text y='24' x='4' font-size='22'>🌿</text></svg>">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{min-height:100%;background:#0d1a10;font-family:system-ui,-apple-system,sans-serif}
+    body{display:flex;flex-direction:column;align-items:center;padding:16px;min-height:100vh}
+    .page{width:100%;max-width:960px}
+    .w{background:#132218;border-radius:12px;padding:14px 16px;color:#c8e6c9}
+    .ttl{font-size:14px;font-weight:600;line-height:1.4;margin-bottom:.4rem;color:#e0f0e4}
+    .sub{font-size:12px;font-weight:400;color:#7aaa88}
+    .leg{display:grid;grid-template-columns:1fr 1fr;gap:7px 20px;margin-bottom:.7rem;font-size:11px;color:#7aaa88}
+    .leg-t{font-weight:500;margin-bottom:3px;color:#a8d4b0}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .it{display:flex;align-items:center;gap:4px}
+    .colors{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.45rem;font-size:11px;color:#7aaa88}
+    .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:2px}
+    .cb{position:relative;width:100%;height:min(490px,96vw)}
+    canvas#c{width:100%;height:100%}
+    #tip{position:absolute;background:#1e3828;border:.5px solid #2e5440;border-radius:8px;padding:8px 11px;
+         font-size:11px;pointer-events:none;display:none;max-width:min(260px,78vw);
+         line-height:1.55;z-index:10;box-shadow:0 2px 14px rgba(0,0,0,.4);color:#c8e6c9}
+    .sl{display:flex;align-items:center;gap:10px;margin-top:.4rem;flex-wrap:wrap;font-size:11px;color:#7aaa88}
+    /* Références */
+    .refs{background:#0f1c13;border-radius:10px;padding:14px 16px;margin-top:12px;color:#5a8a6a;font-size:11px}
+    .refs h2{font-size:12px;font-weight:600;color:#7aaa88;margin-bottom:8px;letter-spacing:.04em;text-transform:uppercase}
+    .refs ol{padding-left:18px;line-height:1.8}
+    .refs li{margin-bottom:2px}
+    .refs a{color:#4ecb71;text-decoration:none}
+    .refs a:hover{text-decoration:underline}
+    .refs .date{color:#3a5a42;font-style:italic;margin-left:4px}
+    footer{margin-top:12px;font-size:11px;color:#2e5040;text-align:center}
+    footer a{color:#4ecb71;text-decoration:none}
+    @media(max-width:480px){
+      .ttl{font-size:12px}.sub{font-size:10px}
+      .leg{grid-template-columns:1fr;gap:5px}
+      .cb{height:min(380px,96vw)}
+      .refs{font-size:10px}
+    }
+  </style>
 </head>
 <body>
-<div id="map"></div>
-<div class="info-banner" id="counter">Chargement…</div>
+<div class="page">
+<div class="w">
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<div class="ttl">
+  Position sur le climat des candidats déclarés à la présidentielle 2027
+  <div class="sub" id="sub"></div>
+</div>
+
+<div class="leg">
+  <div>
+    <div class="leg-t">Forme — référence GIEC</div>
+    <div class="row">
+      <span class="it"><canvas id="lC" width="18" height="18"></canvas>Explicite (rond)</span>
+      <span class="it"><canvas id="lH" width="18" height="18"></canvas>Implicite (hexagone)</span>
+      <span class="it"><canvas id="lT" width="18" height="18"></canvas>Aucune (triangle)</span>
+    </div>
+  </div>
+  <div>
+    <div class="leg-t">Jeton — nucléaire</div>
+    <div class="row">
+      <span class="it"><span style="width:11px;height:11px;border-radius:50%;background:#f04040;outline:2px solid #fff;outline-offset:1px;display:inline-block"></span>Anti</span>
+      <span class="it"><span style="width:11px;height:11px;border-radius:50%;background:#e6a000;outline:2px solid #fff;outline-offset:1px;display:inline-block"></span>Mixte</span>
+      <span class="it"><span style="width:11px;height:11px;border-radius:50%;background:#2e9e20;outline:2px solid #fff;outline-offset:1px;display:inline-block"></span>Pro</span>
+    </div>
+  </div>
+  <div>
+    <div class="leg-t">Barre — horizon temporel</div>
+    <div class="row">
+      <span class="it"><span style="display:inline-block;width:24px;height:5px;border-radius:2px;border:.5px solid #2e5040;background:linear-gradient(to right,#f04040 25%,#1e3828 25%)"></span>Court terme</span>
+      <span class="it"><span style="display:inline-block;width:24px;height:5px;border-radius:2px;border:.5px solid #2e5040;background:linear-gradient(to right,#e6a000 60%,#1e3828 60%)"></span>Moyen terme</span>
+      <span class="it"><span style="display:inline-block;width:24px;height:5px;border-radius:2px;border:.5px solid #2e5040;background:#2e9e20"></span>Long terme 2050+</span>
+    </div>
+  </div>
+  <div>
+    <div class="leg-t">Contour — budget</div>
+    <div class="row">
+      <span class="it"><canvas id="lAnn" width="18" height="18"></canvas>Contour = annoncé</span>
+      <span class="it"><canvas id="lEst" width="18" height="18"></canvas>Sans contour = estimation</span>
+    </div>
+  </div>
+</div>
+
+<div class="colors">
+  <span><span class="dot" style="background:#4ecb71"></span>Écologistes</span>
+  <span><span class="dot" style="background:#ff5555"></span>LFI/PCF</span>
+  <span><span class="dot" style="background:#cc4444"></span>LO</span>
+  <span><span class="dot" style="background:#ff6eb4"></span>PS/PP</span>
+  <span><span class="dot" style="background:#f0b429"></span>Centre</span>
+  <span><span class="dot" style="background:#5b9bd5"></span>Droite</span>
+  <span><span class="dot" style="background:#8899cc"></span>Extr. droite</span>
+  <span style="margin-left:auto;color:#4a7a5a">Taille = budget Md€/an</span>
+</div>
+
+<div class="cb">
+  <canvas id="c" role="img" aria-label="Scatter plot atténuation/adaptation — présidentielle 2027. Survolez ou tapez chaque point pour le détail des propositions."></canvas>
+  <div id="tip"></div>
+</div>
+<div class="sl" id="sLeg"><span style="font-weight:500">Budget :</span></div>
+
+</div><!-- /.w -->
+
+<!-- ── Références ───────────────────────────────────────────────── -->
+<div class="refs">
+  <h2>Références — données et programmes consultés</h2>
+  <ol>
+    <li><a href="https://melenchon2027.fr/programme2025/livre/chapitre13/s1/" target="_blank">melenchon2027.fr — L'Avenir en commun 2025 : bifurcation écologique (200 Md€)</a><span class="date">consulté le 4 oct. 2026</span></li>
+    <li><a href="https://votons-2027.fr/candidats/melenchon/programme/climat" target="_blank">votons-2027.fr — Programme Mélenchon, 149 mesures climat et écologie</a><span class="date">consulté le 4 oct. 2026</span></li>
+    <li><a href="https://www.franceinfo.fr/elections/presidentielle/on-ne-decouvre-rien-les-candidats-a-la-presidentielle-ont-ils-adapte-leur-programme-apres-les-canicules-d-un-ete-apocalyptique_8174960.html" target="_blank">franceinfo.fr — Les candidats ont-ils adapté leur programme après les canicules ?</a><span class="date">publié le 27 août 2026, consulté le 4 oct. 2026</span></li>
+    <li><a href="https://www.parlons-politique.fr/elections/presidentielle-2027-face-aux-canicules-les-candidats-transforment-ils-lecologie-en-enjeu-de-protection-quotidienne_26406/" target="_blank">parlons-politique.fr — Face aux canicules, l'écologie comme enjeu de protection</a><span class="date">consulté le 4 oct. 2026</span></li>
+    <li><a href="https://www.candidatspresidentielles2027.fr/candidats/raphael-glucksmann" target="_blank">candidatspresidentielles2027.fr — Fiche Raphaël Glucksmann, candidature 23 août 2026</a><span class="date">consulté le 4 oct. 2026</span></li>
+    <li><a href="https://quiproposequoi2027.fr/" target="_blank">quiproposequoi2027.fr — Comparateur de programmes présidentiels 2027</a><span class="date">consulté le 4 oct. 2026</span></li>
+    <li><a href="https://www.ifrap.org/comparateurs/presidentielles-2027" target="_blank">ifrap.org — Comparateur de programmes Présidentielles 2027</a><span class="date">consulté le 4 oct. 2026</span></li>
+    <li><a href="https://comparateurpresident.com/" target="_blank">comparateurpresident.com — Environnement &amp; Énergie par candidat</a><span class="date">consulté le 4 oct. 2026</span></li>
+    <li><a href="https://lcp.fr/actualites/presidentielle-qui-sont-les-candidats-sur-la-ligne-de-depart-de-la-primaire-de-gauche" target="_blank">lcp.fr — Candidats à la primaire PS/PP/GRS (9-17 oct. 2026)</a><span class="date">publié le 16 sept. 2026, consulté le 4 oct. 2026</span></li>
+    <li><a href="https://fr.wikipedia.org/wiki/Primaire_de_la_gauche_unitaire_de_2026" target="_blank">Wikipédia — Primaire de la gauche unitaire de 2026</a><span class="date">consulté le 4 oct. 2026</span></li>
+    <li><a href="https://fr.wikipedia.org/wiki/Primaire_pr%C3%A9sidentielle_socialiste_fran%C3%A7aise_de_2026" target="_blank">Wikipédia — Primaire présidentielle socialiste 2026</a><span class="date">consulté le 4 oct. 2026</span></li>
+    <li><a href="https://theconversation.com/presidentielle-2027-qui-peut-rassembler-la-gauche-sociale-ecologique-291179" target="_blank">theconversation.com — Qui peut rassembler la gauche sociale-écologique ?</a><span class="date">consulté le 4 oct. 2026</span></li>
+    <li>Poligraph.fr — Confirmation dates officielles : 1er tour 18 avril 2027, 2d tour 2 mai 2027<span class="date">consulté le 27 sept. 2026</span></li>
+    <li>Destin Commun — Sondage : 6 Français sur 10 attendent des propositions climatiques<span class="date">publié le 26 août 2026</span></li>
+  </ol>
+  <p style="margin-top:8px;color:#3a5a42;font-style:italic">
+    Positionnements établis par la campagne #Climat2027 à partir des sources ci-dessus.
+    Les scores (0-10) sont des estimations qualitatives, non des mesures objectives.
+    Mise à jour : 4 octobre 2026.
+  </p>
+</div>
+
+<footer>
+  <a href="https://climat2027.fr/">#Climat2027</a> —
+  Si les politiques ne vont pas au climat, le climat viendra aux politiques. —
+  <a href="https://bsky.app/profile/climat2027.bsky.social">@climat2027.bsky.social</a>
+</footer>
+</div><!-- /.page -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-  // ── Fond de carte IGN Plan V2 (gratuit, sans token) ───────────────
-  const map = L.map('map');
-  L.tileLayer(
-    'https://data.geopf.fr/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0' +
-    '&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&TILEMATRIXSET=PM' +
-    '&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&FORMAT=image/png&STYLE=normal',
-    {
-      attribution: '&copy; <a href="https://www.ign.fr/">IGN</a> — ' +
-                   '<a href="https://cartes.gouv.fr/">Géoplateforme</a>',
-      maxZoom: 19, minZoom: 2,
-    }
-  ).addTo(map);
+const cv=document.getElementById('c'),tip=document.getElementById('tip');
+const BG='#132218',BGC='#0f1c13',GRID='#1e3826',TICK='#4a7a5a',LBL='#7aaa88',INK='#9abfa2';
+const tLbl=['Nulle','','Faible','','Modérée','','Forte','','Très forte','','Maximale'];
+function mob(){return cv.clientWidth<500;}
+function scl(b,m){return Math.max(m?9:6,Math.round(3.5+Math.sqrt(b)*4.2));}
 
-  // ⚠️ L'ordre compte : 'nappe' avant 'inondation' car
-  // "inondation par remontée de nappe" contient les deux mots.
-  const TYPES = [
-    { keys: ['sécheresse', 'secheresse', 'rga'], color: '#E65100', label: 'Sécheresse / RGA' },
-    { keys: ['nappe'],                            color: '#00838F', label: 'Remontée de nappe' },
-    { keys: ['inondation', 'coulée', 'coulee'],  color: '#1565C0', label: 'Inondations / coulées' },
-    { keys: ['avalanche'],                        color: '#7B1FA2', label: 'Avalanche' },
-  ];
-  const DEFAULT = { color: '#546E7A', label: 'Autre' };
+/* Compte à rebours */
+(function(){
+  const t0=new Date(),t1=new Date(2027,3,18); // t0 = aujourd'hui, mis à jour automatiquement
+  let s=0,d=new Date(t0);d.setDate(d.getDate()+1);
+  while(d<t1){if(d.getDay()===0)s++;d.setDate(d.getDate()+1);}
+  const ds=t0.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('sub').innerHTML=
+    `à la date du\u202f${ds}\u00a0— <strong style="color:#4ecb71">${s}\u202fdimanches</strong> avant le 1<sup>er</sup>\u202ftour (18\u202favril\u202f2027)`;
+})();
 
-  function typeInfo(typeStr) {
-    const t = (typeStr || '').toLowerCase();
-    for (const def of TYPES) {
-      if (def.keys.some(k => t.includes(k))) return def;
+/* Données — mises à jour au 4 oct. 2026 */
+const D=[
+  /* Budget Mélenchon corrigé : 200 Md€ sur le mandat = 40 Md€/an (programme officiel) */
+  {nom:'Jean-Luc Mélenchon',   s:'LFI',   att:8.5,adp:7.6,b:40, ann:true, g:'partial', nuk:'orange',h:.75,c:'#ff5555',
+   nt:'Plan 200 Md€ sur le mandat (officiel, « L\'Avenir en commun 2025 »). 149 mesures climat. -65 % GES 2030. 100 % ENR 2050. Sortie nucléaire. Post-été 2026 : bombardiers d\'eau, surveillance satellitaire, conscription citoyenne sécurité civile.'},
+  {nom:'Marine Tondelier',     s:'ÉELV',  att:9.2,adp:8.1,b:20, ann:false,g:'explicit',nuk:'red',   h:.90,c:'#4ecb71',
+   nt:'AR6 explicite. -60 % GES 2030. Sortie fossiles et nucléaire. ENR 100 %. Post-été 2026 : congé climatique proposé, programme inchangé dans ses fondamentaux. Primaire gauche unitaire (11 oct.) : désignée candidate avec 86 % des voix de son parti.'},
+  {nom:'Raphaël Glucksmann',   s:'PP/PS', att:6.5,adp:7.9,b:10, ann:false,g:'explicit',nuk:'orange',h:.72,c:'#ff6eb4',
+   nt:'Candidature déclarée 23 août 2026. République écologique / AR6 cité. ENR, rénovation thermique, agroécologie, train. Concourt à la primaire PS/PP (9-17 oct. 2026). Programme intégral non encore publié.'},
+  {nom:'Delphine Batho',       s:'G.Éco', att:8.1,adp:6.5,b:8,  ann:false,g:'explicit',nuk:'red',   h:.85,c:'#4ecb71',
+   nt:'Décroissance. Sortie nucléaire. Objectifs GIEC explicites. Agriculture biologique. Défend « l\'écologie intégrale démocratique ». 1 proposition chiffrée / 9 sans réponse (quiproposequoi2027.fr).'},
+  {nom:'Fabien Roussel',       s:'PCF',   att:6.4,adp:5.4,b:5,  ann:false,g:'partial', nuk:'green', h:.60,c:'#ff5555',
+   nt:'Pôle public de l\'énergie. ENR + maintien nucléaire. Gratuité énergie. Cite la crise climatique sans mention GIEC. Refuse la primaire de gauche.'},
+  {nom:'Édouard Philippe',     s:'Hor.',  att:4.5,adp:8.3,b:2,  ann:true, g:'partial', nuk:'green', h:.62,c:'#f0b429',
+   nt:'Fonds unique adaptation 2 Md€/an (annoncé 17/09/2026, seul budget officiel). Post-été 2026 : renforcement sécurité civile, mégafeux. Nucléaire + ENR. « Atténuer = faire reculer les fossiles de 57 % à 43 % d\'ici 2035 ».'},
+  {nom:'Karim Bouamrane',      s:'PS',    att:5.0,adp:6.6,b:3,  ann:false,g:'partial', nuk:'orange',h:.38,c:'#ff6eb4',
+   nt:'Plan fraîcheur / végétalisation / rénovation. Refuse la primaire PS. 5 priorités dont le climat (non chiffré à ce stade). Pas de citation GIEC.'},
+  {nom:'Nathalie Arthaud',     s:'LO',    att:4.0,adp:2.1,b:0.5,ann:false,g:'partial', nuk:'red',   h:.42,c:'#cc4444',
+   nt:'Crise écologique = crise du capitalisme. Anti-nucléaire. Pas de propositions chiffrées ni de citation GIEC.'},
+  {nom:'Gabriel Attal',        s:'Ren.',  att:3.0,adp:4.6,b:1,  ann:false,g:'partial', nuk:'green', h:.34,c:'#f0b429',
+   nt:'Géoénergie doublée. Pro-nucléaire. Post-été 2026 : « compléments » ajoutés au programme incluant des équipements de fraîcheur et adaptation. Écologie hors des 5 priorités déclarées initiales.'},
+  {nom:'Bernard Cazeneuve',    s:'Ind.',  att:3.6,adp:4.1,b:0.5,ann:false,g:'partial', nuk:'green', h:.30,c:'#f0b429',
+   nt:'Transition progressive. Pro-nucléaire. Pas de citation scientifique spécifique.'},
+  {nom:'Bruno Retailleau',     s:'LR',    att:2.6,adp:4.0,b:0.5,ann:false,g:'partial', nuk:'green', h:.25,c:'#5b9bd5',
+   nt:'Écologie « sans punition ». Pro-nucléaire expansion. Post-été 2026 : défend les « équipements d\'adaptation ». Accepte le réchauffement sans citer le GIEC.'},
+  {nom:'Xavier Bertrand',      s:'LR',    att:2.4,adp:3.4,b:0.5,ann:false,g:'partial', nuk:'green', h:.25,c:'#5b9bd5',
+   nt:'Transition « sans dogmatisme ». Pro-nucléaire. Pas de citation GIEC.'},
+  {nom:'David Lisnard',        s:'Ind.D', att:1.7,adp:2.7,b:0.3,ann:false,g:'none',    nuk:'green', h:.20,c:'#5b9bd5',
+   nt:'Pragmatisme libéral. Pro-nucléaire. Ni référence GIEC ni urgence climatique reconnue.'},
+  {nom:'Marine Le Pen',        s:'RN',    att:0.9,adp:1.9,b:0.2,ann:false,g:'none',    nuk:'green', h:.16,c:'#8899cc',
+   nt:'Post-été 2026 : « climatisation universelle » comme mesure d\'adaptation. 20 EPR. Anti-taxe carbone. Anti-ZFE. Aucune référence GIEC. Qualifié de « Rassemblement climatosceptique » par É. Philippe.'},
+  {nom:'Éric Zemmour',         s:'Rec.',  att:0.4,adp:0.8,b:0.1,ann:false,g:'none',    nuk:'green', h:.10,c:'#8899cc',
+   nt:'Climatoscepticisme assumé. Pro-nucléaire. Remet en cause le consensus GIEC.'},
+  {nom:'N. Dupont-Aignan',     s:'DLF',   att:1.1,adp:1.2,b:0.2,ann:false,g:'none',    nuk:'green', h:.18,c:'#8899cc',
+   nt:'Frexit. Aucune référence GIEC. Contre taxe carbone. Pro-nucléaire souverainiste.'},
+];
+
+function circ(ctx,cx,cy,r){ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);}
+function hexa(ctx,cx,cy,r){
+  ctx.beginPath();
+  for(let i=0;i<6;i++){const a=i*Math.PI/3-Math.PI/2;ctx[i?'lineTo':'moveTo'](cx+Math.cos(a)*r,cy+Math.sin(a)*r);}
+  ctx.closePath();
+}
+function tria(ctx,cx,cy,r){
+  ctx.beginPath();ctx.moveTo(cx,cy-r);
+  ctx.lineTo(cx+r*.866,cy+r*.5);ctx.lineTo(cx-r*.866,cy+r*.5);
+  ctx.closePath();
+}
+function shp(ctx,g,cx,cy,r){
+  if(g==='explicit')circ(ctx,cx,cy,r);
+  else if(g==='partial')hexa(ctx,cx,cy,r);
+  else tria(ctx,cx,cy,r);
+}
+function token(ctx,cx,cy,r,nuk){
+  const tr=Math.max(2.5,r*.27);
+  const col=nuk==='red'?'#f04040':nuk==='orange'?'#e6a000':'#2e9e20';
+  ctx.beginPath();ctx.arc(cx,cy,tr+1.8,0,Math.PI*2);
+  ctx.fillStyle='rgba(255,255,255,.92)';ctx.fill();
+  ctx.beginPath();ctx.arc(cx,cy,tr,0,Math.PI*2);
+  ctx.fillStyle=col;ctx.fill();
+}
+function hbar(ctx,cx,cy,r,pct){
+  const bw=r*2,bh=4,bx=cx-r,by=cy+r+7;
+  ctx.fillStyle='#1e3826';ctx.fillRect(bx,by,bw,bh);
+  ctx.fillStyle=pct>.65?'#2e9e20':pct>.40?'#e6a000':'#f04040';
+  ctx.fillRect(bx,by,bw*pct,bh);
+  ctx.strokeStyle='#2e5040';ctx.lineWidth=.4;ctx.strokeRect(bx,by,bw,bh);
+}
+
+const drawP={id:'draw',afterDraw(chart){
+  const ctx=chart.ctx,xs=chart.scales.x,ys=chart.scales.y,m=mob();
+  D.forEach(c=>{
+    const px=xs.getPixelForValue(c.att),py=ys.getPixelForValue(c.adp),r=scl(c.b,m);
+    ctx.save();
+    ctx.fillStyle=c.c+'cc';shp(ctx,c.g,px,py,r);ctx.fill();
+    if(c.ann){ctx.strokeStyle='#fff';ctx.lineWidth=2.2;shp(ctx,c.g,px,py,r);ctx.stroke();}
+    ctx.restore();
+    token(ctx,px,py,r,c.nuk);
+    if(!m)hbar(ctx,px,py,r,c.h);
+    if(!m){
+      ctx.save();ctx.font='500 10px system-ui';ctx.fillStyle=INK;
+      ctx.textAlign='center';ctx.textBaseline='bottom';
+      ctx.fillText(c.s,px,py-r-3);ctx.restore();
     }
-    return DEFAULT;
+  });
+}};
+
+const quadP={id:'quad',beforeDraw(chart){
+  const ctx=chart.ctx,xs=chart.scales.x,ys=chart.scales.y;
+  ctx.save();ctx.fillStyle=BGC;
+  ctx.fillRect(xs.left,ys.top,xs.right-xs.left,ys.bottom-ys.top);ctx.restore();
+  const mx=xs.getPixelForValue(5),my=ys.getPixelForValue(5);
+  ctx.save();ctx.setLineDash([5,4]);ctx.strokeStyle='#2a4a36';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(mx,ys.top);ctx.lineTo(mx,ys.bottom);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(xs.left,my);ctx.lineTo(xs.right,my);ctx.stroke();
+  ctx.setLineDash([]);
+  if(!mob()){
+    ctx.font='10px system-ui';ctx.fillStyle='#2a4a36';
+    ctx.textAlign='left';ctx.fillText('Att. forte / Adapt. faible',mx+4,my-5);
+    ctx.fillText('Fort sur les deux axes',mx+4,ys.top+13);
+    ctx.textAlign='right';ctx.fillText('Peu sur les deux axes',mx-4,my+13);
+    ctx.fillText('Adapt. forte / Att. faible',mx-4,my-5);
   }
+  ctx.restore();
+}};
 
-  // ── Légende ───────────────────────────────────────────────────────
-  const legend = L.control({ position: 'bottomright' });
-  legend.onAdd = function () {
-    const div = L.DomUtil.create('div', 'legend');
-    const rows = TYPES.map(d =>
-      `<div class="legend-item">
-         <span class="legend-dot" style="background:${d.color}"></span>${d.label}
-       </div>`
-    ).join('');
-    div.innerHTML =
-      `<h4>#1Jour1CommuneSinistree</h4>` + rows +
-      `<hr class="legend-sep">` +
-      `<div class="legend-latest" id="legend-latest">Aucune commune chargée.</div>`;
-    return div;
-  };
-  legend.addTo(map);
+const chart=new Chart(cv,{
+  type:'scatter',
+  data:{datasets:[{data:[{x:0,y:0},{x:10,y:10}],pointRadius:0}]},
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    layout:{padding:{top:mob()?12:20,right:mob()?8:18,bottom:mob()?5:8,left:mob()?4:6}},
+    scales:{
+      x:{min:0,max:10,
+        title:{display:true,text:mob()?'Atténuation →':'Atténuation — ambition de réduction des émissions →',color:LBL,font:{size:mob()?10:12,weight:'500'}},
+        grid:{color:GRID,lineWidth:1},ticks:{color:TICK,font:{size:mob()?9:11},maxTicksLimit:mob()?6:11,callback:v=>tLbl[v]??''}},
+      y:{min:0,max:10,
+        title:{display:true,text:mob()?'Adaptation →':'Adaptation — préparation aux effets inévitables →',color:LBL,font:{size:mob()?10:12,weight:'500'}},
+        grid:{color:GRID,lineWidth:1},ticks:{color:TICK,font:{size:mob()?9:11},maxTicksLimit:mob()?6:11,callback:v=>tLbl[v]??''}}
+    },
+    plugins:{legend:{display:false},tooltip:{enabled:false}},
+    animation:false,
+  },
+  plugins:[drawP,quadP]
+});
 
-  // ── Paramètres d'URL (?lat=…&lon=…&zoom=…) ───────────────────────
-  const params    = new URLSearchParams(window.location.search);
-  const focusLat  = parseFloat(params.get('lat'));
-  const focusLon  = parseFloat(params.get('lon'));
-  const focusZoom = parseFloat(params.get('zoom')) || 13;
+let tipTO;
+function showTip(e){
+  e.preventDefault();
+  const t=e.touches?e.touches[0]:e;
+  const rect=cv.getBoundingClientRect();
+  const mx=t.clientX-rect.left,my=t.clientY-rect.top;
+  const xs=chart.scales.x,ys=chart.scales.y,m=mob();
+  let best=null,bd=m?52:46;
+  D.forEach(c=>{
+    const d=Math.hypot(xs.getPixelForValue(c.att)-mx,ys.getPixelForValue(c.adp)-my);
+    if(d<bd){bd=d;best=c;}
+  });
+  if(best){
+    const lx=mx+14<rect.width-265?mx+14:mx-260;
+    tip.style.display='block';tip.style.left=lx+'px';tip.style.top=Math.max(0,my-60)+'px';
+    const gL=best.g==='explicit'?'● GIEC explicite':best.g==='none'?'▲ Aucune / sceptique':'⬡ GIEC implicite';
+    const nL=best.nuk==='red'?'🔴 Anti-nucléaire':best.nuk==='orange'?'🟠 Mixte':'🟢 Pro-nucléaire';
+    const hL=best.h>.65?`Long terme 2050+ (${Math.round(best.h*100)}\u202f%)`:best.h>.40?`Moyen terme (${Math.round(best.h*100)}\u202f%)`:`Court terme (${Math.round(best.h*100)}\u202f%)`;
+    const bS=best.ann?`<strong>${best.b}\u202fMd€/an</strong> <span style="color:#4ecb71">✓ annoncé</span>`:`~${best.b}\u202fMd€/an (estimation)`;
+    tip.innerHTML=`<strong style="font-size:12px;color:#e0f0e4">${best.nom}</strong><br>`
+      +`<span style="color:#7aaa88">${gL}</span><br><span style="color:#7aaa88">${nL}</span><br>`
+      +`<span style="color:#4a7a5a">⏱ ${hL}</span><br>💶 ${bS}<br>`
+      +`<span style="color:#4a7a5a;font-size:10px;display:block;margin-top:3px">${best.nt}</span>`;
+    clearTimeout(tipTO);
+    if(e.touches)tipTO=setTimeout(()=>tip.style.display='none',4500);
+  } else tip.style.display='none';
+}
+cv.addEventListener('mousemove',showTip);
+cv.addEventListener('touchstart',showTip,{passive:false});
+cv.addEventListener('mouseleave',()=>tip.style.display='none');
+cv.addEventListener('touchend',()=>{clearTimeout(tipTO);tipTO=setTimeout(()=>tip.style.display='none',3500);});
+let rzT;
+window.addEventListener('resize',()=>{clearTimeout(rzT);rzT=setTimeout(()=>chart.update(),80);});
 
-  // ── Chargement des marqueurs ──────────────────────────────────────
-  fetch('markers.json?t=' + Date.now())
-    .then(r => r.json())
-    .then(markers => {
-      document.getElementById('counter').textContent =
-        markers.length + ' commune(s) sinistrée(s) recensée(s) — #Climat2027';
+function legC(id,type,border){
+  const c2=document.getElementById(id),ctx=c2.getContext('2d');
+  const cl='#9abfa2';ctx.fillStyle=cl+'aa';
+  const fn=type==='c'?circ:type==='h'?hexa:tria;
+  fn(ctx,9,9,7);ctx.fill();
+  if(border){ctx.strokeStyle=cl;ctx.lineWidth=1.3;fn(ctx,9,9,7);ctx.stroke();}
+}
+legC('lC','c',true);legC('lH','h',true);legC('lT','t',true);
+legC('lAnn','c',true);legC('lEst','c',false);
 
-      const placed = [];
-
-      markers.forEach((m, i) => {
-        const isLatest = (i === markers.length - 1);
-        const info     = typeInfo(m.type);
-
-        let marker;
-
-        if (isLatest) {
-          // Marqueur spécial pour la dernière commune : DivIcon avec anneau pulsant
-          const icon = L.divIcon({
-            className: '',
-            html: `<div class="latest-icon" style="background:${info.color}">
-                     <div class="pulse-ring"></div>
-                   </div>`,
-            iconSize:   [20, 20],
-            iconAnchor: [10, 10],
-            popupAnchor: [0, -12],
-          });
-          marker = L.marker([m.lat, m.lon], { icon }).addTo(map);
-        } else {
-          marker = L.circleMarker([m.lat, m.lon], {
-            radius:      8,
-            fillColor:   info.color,
-            color:       '#fff',
-            weight:      1.5,
-            opacity:     1,
-            fillOpacity: 0.85,
-          }).addTo(map);
-        }
-
-        marker.bindPopup(
-          `<b>${m.commune}</b> (${m.departement})<br>` +
-          `<span style="color:${info.color}">●</span> ${info.label}<br>` +
-          (m.day ? `Jour ${m.day} — ` : '') + (m.date || '')
-        );
-
-        placed.push(marker);
-
-        if (isLatest) {
-          document.getElementById('legend-latest').innerHTML =
-            `<strong>Dernier ajout${m.day ? ' (Jour ' + m.day + ')' : ''}</strong>` +
-            `${m.commune} (${m.departement})<br>` +
-            `<em style="color:${info.color}">● ${info.label}</em><br>` +
-            `<em>${m.date || ''}</em>`;
-        }
-      });
-
-      // Centrage
-      if (!isNaN(focusLat) && !isNaN(focusLon)) {
-        map.setView([focusLat, focusLon], focusZoom);
-      } else if (placed.length > 0) {
-        map.fitBounds(L.featureGroup(placed).getBounds().pad(0.2));
-      } else {
-        map.setView([46.6, 2.5], 6);
-      }
-    })
-    .catch(() => {
-      document.getElementById('counter').textContent = "Impossible de charger les données.";
-      map.setView([46.6, 2.5], 6);
-    });
+const sLeg=document.getElementById('sLeg');
+[0.5,2,10,40].forEach(b=>{
+  const r=scl(b,false),sp=document.createElement('span');
+  sp.style.cssText='display:flex;align-items:center;gap:5px';
+  sp.innerHTML=`<span style="display:inline-block;width:${r*2}px;height:${r*2}px;border-radius:50%;background:#2a4a36;border:.5px solid #3a6a4a;flex-shrink:0"></span>${b<1?'<\u202f1':b}\u202fMd€`;
+  sLeg.appendChild(sp);
+});
 </script>
 </body>
 </html>

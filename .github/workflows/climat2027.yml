@@ -6,6 +6,7 @@ on:
     - cron: '0 8 * * *'    # 8h UTC = 9h Paris (hiver)
     - cron: '0 11 * * *'   # 11h UTC = 13h Paris (été)
     - cron: '0 12 * * *'   # 12h UTC = 13h Paris (hiver)
+    - cron: '0 6 * * 0'    # 6h UTC dimanche = 8h Paris → mise à jour infographie
   workflow_dispatch:
     inputs:
       mode:
@@ -141,4 +142,32 @@ PYEOF
                   linkedin_state.json || true
           git diff --cached --quiet || \
             git commit -m "Carte GASPAR $(date +%F)"
+          git push
+
+  # ── Job 3 : Dimanche — mise à jour de l'infographie ───────────────
+  maj_infographie:
+    if: >
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'all')
+      || (github.event_name == 'schedule' && github.event.schedule == '0 6 * * 0')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Installe les dépendances
+        run: pip install matplotlib pillow
+
+      - name: Régénère og_image.jpg avec la date du jour
+        run: python generate_og.py --out images/og_image.jpg
+
+      - name: Commit si l'image a changé
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add images/og_image.jpg
+          git diff --cached --quiet || \
+            git commit -m "infographie : mise à jour du $(date +%d/%m/%Y)"
           git push
