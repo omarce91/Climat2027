@@ -99,34 +99,7 @@ jobs:
           CREDS
 
       - name: Bluesky — carte #CommunesSinistreesDuJour
-        run: |
-          GASPAR=$(ls catnat_gaspar*.csv 2>/dev/null | tail -1)
-          if [ -z "$GASPAR" ]; then
-            echo "Aucun CSV GASPAR — carte Bluesky ignorée."
-            exit 0
-          fi
-          python - << PYEOF
-import sys
-sys.path.insert(0, '.')
-from pathlib import Path
-from climat2027 import (
-    load_credentials, build_richtext, load_gaspar_communes,
-    build_coords_cache, generate_gaspar_map, ensure_gaspar_cache,
-    post_gaspar_map
-)
-try:
-    from atproto import Client, client_utils
-except ImportError:
-    sys.exit("pip install atproto")
-handle, app_password, _, _ = load_credentials(Path("credentials.json"))
-client = Client()
-client.login(handle, app_password)
-gaspar_csv = Path("$GASPAR")
-cache_file = Path("commune_coords_cache.json")
-ensure_gaspar_cache(gaspar_csv, cache_file)
-post_gaspar_map(client, client_utils, gaspar_csv, cache_file,
-                gaspar_state_file=Path("gaspar_map_state.json"))
-PYEOF
+        run: python post_gaspar_bluesky.py
 
       - name: LinkedIn — carte #CommunesSinistreesDuJour
         run: |
