@@ -1055,15 +1055,21 @@ def _build_reply_refs(models, post):
 def run_reply_mode(args, client, client_c27, posts, slogan, stats,
                    client_utils, models,
                    mistral_api_key: str | None = None) -> None:
-    """client     = omarce  (lecture des likes)
-       client_c27 = climat2027 (envoi des replies + repost par omarce)"""
+    """client     = omarce  (repost des replies de c27)
+       client_c27 = climat2027 (lecture des PROPRES likes, envoi des replies)
+
+    Flux :
+      1. Récupère les posts likés par climat2027.bsky.social
+      2. Poste la réponse depuis climat2027.bsky.social
+      3. omarce.bsky.social reposte cette réponse
+    """
     state_file = Path(args.humor_reply_state_file)
     my_did     = client_c27.me.did   # on vérifie si c27 a déjà répondu
     since_dt   = datetime.now(timezone.utc) - timedelta(hours=args.hours)
 
-    print(f"Recherche des likes depuis {since_dt.isoformat()}...")
-    liked = _get_recent_likes(client, since_dt)   # likes d'omarce
-    print(f"{len(liked)} post(s) liké(s) dans la fenêtre de {args.hours}h.")
+    print(f"Recherche des likes de @climat2027 depuis {since_dt.isoformat()}...")
+    liked = _get_recent_likes(client_c27, since_dt)   # likes de climat2027 ← modifié
+    print(f"{len(liked)} post(s) liké(s) par climat2027 dans la fenêtre de {args.hours}h.")
     if mistral_api_key:
         print("  [Mistral] Sélection intelligente activée.")
     else:
@@ -1078,7 +1084,7 @@ def run_reply_mode(args, client, client_c27, posts, slogan, stats,
             break
         uri = subject["uri"]
         try:
-            res = client.get_post_thread(uri=uri, depth=1)   # lecture via omarce
+            res = client_c27.get_post_thread(uri=uri, depth=1)   # lecture via climat2027
             thread_post = res.thread.post
         except Exception as e:
             print(f"  [ignoré] {uri} ({e})")
