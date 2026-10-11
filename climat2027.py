@@ -121,17 +121,60 @@ def _login_clients(handle: str, app_password: str,
     return client_omarce, client_c27
 
 
-def _repost_omarce(client_omarce, result, label: str = "post") -> None:
-    """omarce.bsky.social reposte un post émis par climat2027.bsky.social."""
+_OMARCE_REPOST_STATE_FILE = Path("omarce_repost_state.json")
+_MAX_REPOST_LOG = 500   # entrées conservées (nettoyage automatique)
+
+
+def _load_repost_log(state_file: Path = _OMARCE_REPOST_STATE_FILE) -> set[str]:
+    """Charge l'ensemble des URIs déjà repostés par omarce."""
+    if state_file.exists():
+        try:
+            data = json.loads(state_file.read_text(encoding="utf-8"))
+            return set(data.get("reposted_uris", []))
+        except Exception:
+            pass
+    return set()
+
+
+def _save_repost_log(uris: set[str],
+                     state_file: Path = _OMARCE_REPOST_STATE_FILE) -> None:
+    """Persiste le log des URIs repostés (liste limitée à _MAX_REPOST_LOG)."""
+    lst = sorted(uris)[-_MAX_REPOST_LOG:]   # garde les plus récents (tri lex)
+    try:
+        state_file.write_text(
+            json.dumps({"reposted_uris": lst}, ensure_ascii=False, indent=2),
+            encoding="utf-8"
+        )
+    except Exception as e:
+        print(f"  [repost log] Impossible de sauvegarder : {e}")
+
+
+def _repost_omarce(client_omarce, result, label: str = "post",
+                   state_file: Path = _OMARCE_REPOST_STATE_FILE) -> None:
+    """omarce.bsky.social reposte un post émis par climat2027.bsky.social.
+
+    Idempotent : consulte omarce_repost_state.json avant d'agir et ne reposte
+    jamais deux fois le même URI, même si le script est relancé.
+    """
     if client_omarce is None or result is None:
         return
-    # Évite de se repost soi-même si les deux clients sont identiques
-    if getattr(client_omarce, 'me', None) and getattr(result, 'uri', None):
-        try:
-            client_omarce.repost(uri=result.uri, cid=result.cid)
-            print(f"  ↺ omarce a reposté le {label} de climat2027.")
-        except Exception as e:
-            print(f"  [repost omarce] Erreur ({label}) : {e}")
+    uri = getattr(result, "uri", None)
+    cid = getattr(result, "cid", None)
+    if not uri or not getattr(client_omarce, "me", None):
+        return
+
+    already = _load_repost_log(state_file)
+    if uri in already:
+        print(f"  ↺ omarce a déjà reposté ce {label} ({uri[:40]}…) — ignoré.")
+        return
+
+    try:
+        client_omarce.repost(uri=uri, cid=cid)
+        already.add(uri)
+        _save_repost_log(already, state_file)
+        print(f"  ↺ omarce a reposté le {label} de climat2027.")
+    except Exception as e:
+        print(f"  [repost omarce] Erreur ({label}) : {e}")
 
 def build_richtext(client_utils, text: str):
     """Hashtags et liens cliquables sur Bluesky."""
