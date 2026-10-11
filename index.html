@@ -129,6 +129,10 @@
   <ol>
     <li><a href="https://melenchon2027.fr/programme2025/livre/chapitre13/s1/" target="_blank">melenchon2027.fr — L'Avenir en commun 2025 : bifurcation écologique (200 Md€)</a><span class="date">consulté le 4 oct. 2026</span></li>
     <li><a href="https://votons-2027.fr/candidats/melenchon/programme/climat" target="_blank">votons-2027.fr — Programme Mélenchon, 149 mesures climat et écologie</a><span class="date">consulté le 4 oct. 2026</span></li>
+    <li><a href="https://votons-2027.fr/candidats/ruffin/programme" target="_blank">votons-2027.fr — Programme Ruffin (Debout !), 104 mesures dont écologie (travaillisme écologique)</a><span class="date">consulté le 8 oct. 2026</span></li>
+    <li><a href="https://programme-candidat.fr/personnalites/francois-ruffin" target="_blank">programme-candidat.fr — François Ruffin : position a-croissante, quota carbone aérien, rénovation thermique 10-20 Md€/an</a><span class="date">consulté le 8 oct. 2026</span></li>
+    <li><a href="https://votons-2027.fr/themes/climat" target="_blank">votons-2027.fr — Positions de tous les candidats sur le climat et l'écologie (Philippot, Asselineau, Villepin…)</a><span class="date">consulté le 8 oct. 2026</span></li>
+    <li><a href="https://www.elyseescope.com/le-radar/enjeux-climatiques-candidats-presidentielle-2027-programmes" target="_blank">elyseescope.com — Enjeux climatiques : comparaison des programmes présidentiels 2027</a><span class="date">consulté le 8 oct. 2026</span></li>
     <li><a href="https://www.franceinfo.fr/elections/presidentielle/on-ne-decouvre-rien-les-candidats-a-la-presidentielle-ont-ils-adapte-leur-programme-apres-les-canicules-d-un-ete-apocalyptique_8174960.html" target="_blank">franceinfo.fr — Les candidats ont-ils adapté leur programme après les canicules ?</a><span class="date">publié le 27 août 2026, consulté le 4 oct. 2026</span></li>
     <li><a href="https://www.parlons-politique.fr/elections/presidentielle-2027-face-aux-canicules-les-candidats-transforment-ils-lecologie-en-enjeu-de-protection-quotidienne_26406/" target="_blank">parlons-politique.fr — Face aux canicules, l'écologie comme enjeu de protection</a><span class="date">consulté le 4 oct. 2026</span></li>
     <li><a href="https://www.candidatspresidentielles2027.fr/candidats/raphael-glucksmann" target="_blank">candidatspresidentielles2027.fr — Fiche Raphaël Glucksmann, candidature 23 août 2026</a><span class="date">consulté le 4 oct. 2026</span></li>
@@ -176,6 +180,8 @@ function scl(b,m){return Math.max(m?9:6,Math.round(3.5+Math.sqrt(b)*4.2));}
 
 /* Données — mises à jour au 4 oct. 2026 */
 const D=[
+  {nom:'François Ruffin',       s:'Deb.',  att:7.2,adp:5.5,b:12, ann:false,g:'partial', nuk:'red',   h:.68,c:'#e84a2f',
+   nt:'« Travaillisme écologique » (mouvement Debout !). 10-20 Md€/an rénovation thermique (annoncé). -50 % CO₂ 2030. Quota carbone aérien individuel. Agroécologie. ZAN. Position « a-croissante ». Candidat primaire gauche unitaire (11 oct. 2026).'},
   /* Budget Mélenchon corrigé : 200 Md€ sur le mandat = 40 Md€/an (programme officiel) */
   {nom:'Jean-Luc Mélenchon',   s:'LFI',   att:8.5,adp:7.6,b:40, ann:true, g:'partial', nuk:'orange',h:.75,c:'#ff5555',
    nt:'Plan 200 Md€ sur le mandat (officiel, « L\'Avenir en commun 2025 »). 149 mesures climat. -65 % GES 2030. 100 % ENR 2050. Sortie nucléaire. Post-été 2026 : bombardiers d\'eau, surveillance satellitaire, conscription citoyenne sécurité civile.'},
@@ -209,6 +215,12 @@ const D=[
    nt:'Climatoscepticisme assumé. Pro-nucléaire. Remet en cause le consensus GIEC.'},
   {nom:'N. Dupont-Aignan',     s:'DLF',   att:1.1,adp:1.2,b:0.2,ann:false,g:'none',    nuk:'green', h:.18,c:'#8899cc',
    nt:'Frexit. Aucune référence GIEC. Contre taxe carbone. Pro-nucléaire souverainiste.'},
+  {nom:'Florian Philippot',    s:'Pat.',  att:0.8,adp:1.0,b:0.1,ann:false,g:'none',    nuk:'green', h:.10,c:'#8899cc',
+   nt:'Arrêter et démanteler toutes les éoliennes. Investissement massif nucléaire. Aucune référence GIEC. Souverainiste, proche RN sur l\'écologie.'},
+  {nom:'F. Asselineau',        s:'UPR',   att:2.2,adp:2.8,b:0.2,ann:false,g:'none',    nuk:'green', h:.45,c:'#8899cc',
+   nt:'Frexit. 70 % du fret sur rail (axes prioritaires). TVA nulle sur produits locaux, bio et circuits courts. Pro-nucléaire. Pas de référence GIEC.'},
+  {nom:'D. de Villepin',       s:'LFH',   att:3.8,adp:5.0,b:0.8,ann:false,g:'partial', nuk:'orange',h:.55,c:'#f0b429',
+   nt:'La France Humaniste. Impôt environnemental unique avec prix du carbone et dividende climat redistribué. Fourchette encadrée prix carburants (1,75–2,50 €). GIEC implicite. Mixte nucléaire/ENR.'},
 ];
 
 function circ(ctx,cx,cy,r){ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);}
