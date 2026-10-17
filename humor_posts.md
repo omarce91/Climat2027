@@ -222,3 +222,15 @@ l faut 500 parrainages d'élus pour se présenter à la présidentielle. 500 mai
 #Climat2027 #présidentielle2027 #presidentielle2027
 
 ---
+
+Votre facture d’électricité explose comme un barbecue en plein hiver ? Le climat mérite un candidat. #Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+Votre café a un goût de cendres ce matin ? Le climat a aussi son arôme. #Climat2027 #présidentielle2027 #presidentielle2027
+
+---
+
+Votre parapluie est devenu une planche de surf à cause des inondations ? Le climat mérite une action. #Climat2027 #présidentielle2027 #presidentielle2027
+
+---

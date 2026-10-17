@@ -122,7 +122,32 @@ def _login_clients(handle: str, app_password: str,
 
 
 _OMARCE_REPOST_STATE_FILE = Path("omarce_repost_state.json")
+_REPLY_STATE_FILE         = Path("c27_reply_state.json")
 _MAX_REPOST_LOG = 500   # entrées conservées (nettoyage automatique)
+
+
+def _load_replied_uris(state_file: Path = _REPLY_STATE_FILE) -> set[str]:
+    """Charge l'ensemble des URIs auxquels climat2027 a déjà répondu."""
+    if state_file.exists():
+        try:
+            data = json.loads(state_file.read_text(encoding="utf-8"))
+            return set(data.get("replied_uris", []))
+        except Exception:
+            pass
+    return set()
+
+
+def _save_replied_uris(uris: set[str],
+                       state_file: Path = _REPLY_STATE_FILE) -> None:
+    """Persiste le log des URIs déjà traités (limité à _MAX_REPOST_LOG entrées)."""
+    lst = sorted(uris)[-_MAX_REPOST_LOG:]
+    try:
+        state_file.write_text(
+            json.dumps({"replied_uris": lst}, ensure_ascii=False, indent=2),
+            encoding="utf-8"
+        )
+    except Exception as e:
+        print(f"  [reply log] Impossible de sauvegarder : {e}")
 
 
 def _load_repost_log(state_file: Path = _OMARCE_REPOST_STATE_FILE) -> set[str]:
@@ -1106,19 +1131,21 @@ def run_reply_mode(args, client, client_c27, posts, slogan, stats,
       2. Poste la réponse depuis climat2027.bsky.social
       3. omarce.bsky.social reposte cette réponse
     """
-    state_file = Path(args.humor_reply_state_file)
-    my_did     = client_c27.me.did   # on vérifie si c27 a déjà répondu
-    since_dt   = datetime.now(timezone.utc) - timedelta(hours=args.hours)
+    state_file       = Path(args.humor_reply_state_file)
+    reply_state_file = _REPLY_STATE_FILE
+    my_did           = client_c27.me.did   # on vérifie si c27 a déjà répondu
+    since_dt         = datetime.now(timezone.utc) - timedelta(hours=args.hours)
 
     print(f"Recherche des likes de @climat2027 depuis {since_dt.isoformat()}...")
-    liked = _get_recent_likes(client_c27, since_dt)   # likes de climat2027 ← modifié
+    liked = _get_recent_likes(client_c27, since_dt)   # likes de climat2027
     print(f"{len(liked)} post(s) liké(s) par climat2027 dans la fenêtre de {args.hours}h.")
     if mistral_api_key:
         print("  [Mistral] Sélection intelligente activée.")
     else:
         print("  [Mistral] Clé absente — tirage pondéré par score.")
 
-    state = _load_humor_state(state_file)
+    state         = _load_humor_state(state_file)
+    already_replied = _load_replied_uris(reply_state_file)   # URIs persistés
     sent = skipped = errors = 0
 
     for subject in liked:
@@ -1126,6 +1153,13 @@ def run_reply_mode(args, client, client_c27, posts, slogan, stats,
             print(f"Limite --max-replies ({args.max_replies}) atteinte.")
             break
         uri = subject["uri"]
+
+        # 1. Vérification rapide dans le fichier d'état persisté (sans appel réseau)
+        if uri in already_replied:
+            print(f"  [déjà répondu] {uri[:50]}… (état persisté) — ignoré.")
+            skipped += 1
+            continue
+
         try:
             res = client_c27.get_post_thread(uri=uri, depth=1)   # lecture via climat2027
             thread_post = res.thread.post
@@ -1133,7 +1167,12 @@ def run_reply_mode(args, client, client_c27, posts, slogan, stats,
             print(f"  [ignoré] {uri} ({e})")
             errors += 1
             continue
+
+        # 2. Vérification dans le thread live (filet de sécurité)
         if _has_my_reply(res.thread, my_did):
+            print(f"  [déjà répondu] {uri[:50]}… (thread live) — ignoré.")
+            already_replied.add(uri)            # synchronise l'état
+            _save_replied_uris(already_replied, reply_state_file)
             skipped += 1
             continue
 
@@ -1169,6 +1208,8 @@ def run_reply_mode(args, client, client_c27, posts, slogan, stats,
 
         state["last_text"] = post_text
         _save_humor_state(state_file, state)
+        already_replied.add(uri)
+        _save_replied_uris(already_replied, reply_state_file)
         sent += 1
         print(f"  Répondu (climat2027) : {result_post.uri}")
         _repost_omarce(client, result_post, "reply")   # client = omarce
