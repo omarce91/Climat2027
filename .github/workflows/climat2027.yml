@@ -1,128 +1,35 @@
-name: Climat2027 — posts quotidiens
+name: Climat2027 — Automatisations
 
 on:
   schedule:
-    - cron: '0 7 * * *'    # 7h UTC = 9h Paris (été)
-    - cron: '0 8 * * *'    # 8h UTC = 9h Paris (hiver)
-    - cron: '0 11 * * *'   # 11h UTC = 13h Paris (été)
-    - cron: '0 12 * * *'   # 12h UTC = 13h Paris (hiver)
-    - cron: '0 6 * * 0'    # 6h UTC dimanche = 8h Paris → mise à jour infographie
+    # ── Dimanche 10 h Paris (9 h UTC hiver / 8 h UTC été) — infographie og_image.jpg
+    - cron: '0 9 * * 0'
+    # ── Lundi + jeudi 7 h Paris (5 h UTC) — analyse débats (si nouveaux transcripts)
+    - cron: '0 5 * * 1,4'
   workflow_dispatch:
     inputs:
-      mode:
-        description: 'Mode (all, carte_gaspar, linkedin)'
+      job:
+        description: 'Job à lancer (all / infographie / debats / gaspar / bluesky)'
         required: false
         default: 'all'
 
 permissions:
   contents: write
 
+env:
+  PYTHON: python3
+
+# ════════════════════════════════════════════════════════════════════════════
 jobs:
-  # ── Job 1 : 9h — Bluesky commune + stats + likes ──────────────────
-  post_quotidien:
-    if: >
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'all')
-      || (github.event_name == 'schedule' && (github.event.schedule == '0 7 * * *' || github.event.schedule == '0 8 * * *'))
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Installe les dépendances
-        run: pip install -r requirements.txt
-
-      - name: Crée credentials.json
-        run: |
-          cat > credentials.json << CREDS
-          {
-            "handle":                 "${{ secrets.BSKY_HANDLE }}",
-            "app_password":           "${{ secrets.BSKY_APP_PASSWORD }}",
-            "handle_c27":             "${{ secrets.BSKY_C27_HANDLE }}",
-            "app_password_c27":       "${{ secrets.BSKY_C27_APP_PASSWORD }}",
-            "mistral_api_key":        "${{ secrets.MISTRAL_API_KEY }}",
-            "linkedin_access_token":  "${{ secrets.LINKEDIN_ACCESS_TOKEN }}",
-            "linkedin_person_id":     "${{ secrets.LINKEDIN_PERSON_ID }}"
-          }
-          CREDS
-
-      - name: Bluesky — post commune + stats + likes
-        run: |
-          python climat2027.py \
-            --map-url "${{ vars.MAP_URL || 'https://omarce91.github.io/Climat2027/' }}"
-
-      - name: LinkedIn — post commune
-        run: python linkedin.py --mode commune
-        continue-on-error: true   # ne bloque pas si LinkedIn échoue
-
-      - name: Sauvegarde les fichiers d'état
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add state.json markers.json humor_state.json \
-                  humor_reply_state.json humor_stats.json \
-                  commune_coords_cache.json gaspar_map_state.json \
-                  linkedin_state.json || true
-          git diff --cached --quiet || \
-            git commit -m "Post automatique $(date +%F)"
-          git push
-
-  # ── Job 2 : 13h — Bluesky + LinkedIn carte GASPAR ─────────────────
-  carte_gaspar:
-    if: >
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'carte_gaspar')
-      || (github.event_name == 'schedule' && (github.event.schedule == '0 11 * * *' || github.event.schedule == '0 12 * * *'))
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Installe les dépendances
-        run: pip install -r requirements.txt
-
-      - name: Crée credentials.json
-        run: |
-          cat > credentials.json << CREDS
-          {
-            "handle":                 "${{ secrets.BSKY_HANDLE }}",
-            "app_password":           "${{ secrets.BSKY_APP_PASSWORD }}",
-            "handle_c27":             "${{ secrets.BSKY_C27_HANDLE }}",
-            "app_password_c27":       "${{ secrets.BSKY_C27_APP_PASSWORD }}",
-            "linkedin_access_token":  "${{ secrets.LINKEDIN_ACCESS_TOKEN }}",
-            "linkedin_person_id":     "${{ secrets.LINKEDIN_PERSON_ID }}"
-          }
-          CREDS
-
-      - name: Bluesky — carte #CommunesSinistreesDuJour
-        run: python post_gaspar_bluesky.py
-
-      - name: LinkedIn — carte #CommunesSinistreesDuJour
-        run: |
-          GASPAR=$(ls catnat_gaspar*.csv 2>/dev/null | tail -1)
-          [ -n "$GASPAR" ] && python linkedin.py --mode gaspar --gaspar-csv "$GASPAR"
-        continue-on-error: true
-
-      - name: Sauvegarde les fichiers d'état
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add commune_coords_cache.json gaspar_map_state.json \
-                  linkedin_state.json || true
-          git diff --cached --quiet || \
-            git commit -m "Carte GASPAR $(date +%F)"
-          git push
-
-  # ── Job 3 : Dimanche — mise à jour de l'infographie ───────────────
+  # ── 1. Mise à jour de l'infographie OG chaque dimanche ──────────────────
   maj_infographie:
-    if: >
-      (github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'all')
-      || (github.event_name == 'schedule' && github.event.schedule == '0 6 * * 0')
+    name: "Infographie OG (dimanche)"
     runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' &&
+        (github.event.inputs.job == 'all' || github.event.inputs.job == 'infographie') ||
+      github.event_name == 'schedule' && github.event.schedule == '0 9 * * 0'
     steps:
       - uses: actions/checkout@v4
 
@@ -130,17 +37,167 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Installe les dépendances
-        run: pip install matplotlib pillow
+      - name: Installer dépendances
+        run: pip install matplotlib pillow --quiet
 
-      - name: Régénère og_image.jpg avec la date du jour
-        run: python generate_og.py --out images/og_image.jpg
+      - name: Générer og_image.jpg
+        run: |
+          # Formate la date en français pour l'affichage dans le pied de l'infographie
+          SOURCES_DATE=$(LC_TIME=fr_FR.UTF-8 date -u +'%-d %B %Y' 2>/dev/null || date -u +'%d %B %Y')
+          python generate_og.py --out images/og_image.jpg --sources-date "$SOURCES_DATE"
 
-      - name: Commit si l'image a changé
+      - name: Commiter si modifié
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add images/og_image.jpg
-          git diff --cached --quiet || \
-            git commit -m "infographie : mise à jour du $(date +%d/%m/%Y)"
+          git diff --cached --quiet || git commit -m "chore: og_image.jpg $(date -u +%Y-%m-%d)"
+          git push
+
+      - name: Envoyer og_image.jpg sur climat2027.fr (SFTP Gandi)
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_HOST }}
+          SFTP_USER: ${{ secrets.SFTP_USER }}
+          SFTP_KEY:  ${{ secrets.SFTP_KEY }}
+        run: |
+          # Installe la clé privée SSH
+          mkdir -p ~/.ssh
+          echo "$SFTP_KEY" > ~/.ssh/gandi_deploy
+          chmod 600 ~/.ssh/gandi_deploy
+          # Désactive la vérification du host au premier accès (clé inconnue sur runner)
+          ssh-keyscan -H "$SFTP_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          # Transfert SFTP via lftp (disponible sur ubuntu-latest)
+          lftp -u "$SFTP_USER", sftp://"$SFTP_HOST" <<LFTP
+            set sftp:connect-program "ssh -i ~/.ssh/gandi_deploy -o StrictHostKeyChecking=no"
+            set net:timeout 30
+            mkdir -p images
+            put images/og_image.jpg -o images/og_image.jpg
+            bye
+          LFTP
+          echo "✓ og_image.jpg envoyé sur $SFTP_HOST via SFTP"
+
+  # ── 2. Analyse des débats (transcripts dans transcripts/) ────────────────
+  analyse_debats:
+    name: "Analyse débats & discours"
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' &&
+        (github.event.inputs.job == 'all' || github.event.inputs.job == 'debats') ||
+      github.event_name == 'schedule' && github.event.schedule == '0 5 * * 1,4'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Analyser les transcripts
+        run: |
+          if [ -d transcripts ] && ls transcripts/*.{txt,json} 1>/dev/null 2>&1; then
+            python analyse_debats.py --input transcripts/ --output debats_stats.json
+          else
+            echo "Aucun transcript — génération du jeu de démonstration."
+            python analyse_debats.py --demo --output debats_stats.json
+          fi
+
+      - name: Commiter debats_stats.json si modifié
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add debats_stats.json
+          git diff --cached --quiet || git commit -m "data: debats_stats.json $(date -u +%Y-%m-%d)"
+          git push
+
+  # ── 3. Carte GASPAR + post Bluesky ──────────────────────────────────────
+  gaspar_bluesky:
+    name: "GASPAR → Bluesky"
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' &&
+        (github.event.inputs.job == 'all' || github.event.inputs.job == 'gaspar' ||
+         github.event.inputs.job == 'bluesky')
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Installer dépendances
+        run: pip install atproto matplotlib pillow requests --quiet
+
+      - name: Écrire credentials.json
+        env:
+          BSKY_HANDLE:        ${{ secrets.BSKY_HANDLE }}
+          BSKY_APP_PASSWORD:  ${{ secrets.BSKY_APP_PASSWORD }}
+          BSKY_C27_HANDLE:    ${{ secrets.BSKY_C27_HANDLE }}
+          BSKY_C27_APP_PASSWORD: ${{ secrets.BSKY_C27_APP_PASSWORD }}
+        run: |
+          cat > credentials.json <<EOF
+          {
+            "handle":              "$BSKY_HANDLE",
+            "app_password":        "$BSKY_APP_PASSWORD",
+            "handle_c27":          "$BSKY_C27_HANDLE",
+            "app_password_c27":    "$BSKY_C27_APP_PASSWORD",
+            "linkedin_access_token": "",
+            "linkedin_person_id":    ""
+          }
+          EOF
+
+      - name: Post GASPAR
+        run: python post_gaspar_bluesky.py
+
+      - name: Sauvegarder état (gaspar + repost)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f gaspar_map_state.json omarce_repost_state.json commune_coords_cache.json || true
+          git diff --cached --quiet || git commit -m "state: gaspar+repost $(date -u +%Y-%m-%d)"
+          git push
+
+  # ── 4. Post quotidien Bluesky (likes → reply + repost omarce) ───────────
+  bluesky_daily:
+    name: "Bluesky — reply & repost quotidien"
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' &&
+        (github.event.inputs.job == 'all' || github.event.inputs.job == 'bluesky')
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Installer dépendances
+        run: pip install atproto matplotlib pillow requests --quiet
+
+      - name: Écrire credentials.json
+        env:
+          BSKY_HANDLE:           ${{ secrets.BSKY_HANDLE }}
+          BSKY_APP_PASSWORD:     ${{ secrets.BSKY_APP_PASSWORD }}
+          BSKY_C27_HANDLE:       ${{ secrets.BSKY_C27_HANDLE }}
+          BSKY_C27_APP_PASSWORD: ${{ secrets.BSKY_C27_APP_PASSWORD }}
+        run: |
+          cat > credentials.json <<EOF
+          {
+            "handle":              "$BSKY_HANDLE",
+            "app_password":        "$BSKY_APP_PASSWORD",
+            "handle_c27":          "$BSKY_C27_HANDLE",
+            "app_password_c27":    "$BSKY_C27_APP_PASSWORD",
+            "linkedin_access_token": "",
+            "linkedin_person_id":    ""
+          }
+          EOF
+
+      - name: Lancer climat2027.py (reply mode)
+        run: python climat2027.py --mode reply
+
+      - name: Sauvegarder états (repost omarce + replies c27)
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f omarce_repost_state.json c27_reply_state.json || true
+          git diff --cached --quiet || git commit -m "state: omarce_repost+c27_reply $(date -u +%Y-%m-%d)"
           git push
