@@ -1,8 +1,14 @@
 """
 Met à jour les dates de consultation dans index.html.
 Appelé par le workflow GitHub Actions après update_sources.py.
+
+Formats reconnus dans index.html :
+  <span class="date">consulté le 4 oct. 2026</span>
+  <span class="date">publié le 27 août 2026, consulté le 4 oct. 2026</span>
+  Mise à jour : 4 octobre 2026.
+  /* Données — mises à jour au 4 oct. 2026 */
 """
-import re
+import re, sys
 from datetime import date
 
 MONTHS = ['janvier','février','mars','avril','mai','juin',
@@ -14,20 +20,37 @@ date_fr = f'{d.day} {MONTHS[d.month-1]} {d.year}'
 with open('index.html', encoding='utf-8') as f:
     html = f.read()
 
-# 1. "consultée? le X xxx[.] XXXX" → aujourd'hui
-#    [\w.]+ capte les mois abrégés (oct., nov. …) ; e? capte les deux genres
-html = re.sub(r'consultée? le \d+\s+[\w.]+\s+\d{4}',
-              lambda m: m.group(0).split(' le ')[0] + f' le {date_fr}', html)
+total = 0
 
-# 2. "Mise à jour : X xxx[.] XXXX." → aujourd'hui (espace insécable avant :)
-html = re.sub(r'Mise\s*à\s*jour\s*:\s*\d+\s+[\w.]+\s+\d{4}\.',
-              f'Mise à jour : {date_fr}.', html)
+# 1. "consulté(e) le X xxx[.] XXXX"  — [\w.]+ capte oct. nov. déc. etc.
+html, n = re.subn(
+    r'consultée? le \d+\s+[\w.]+\s+\d{4}',
+    f'consulté le {date_fr}',
+    html)
+total += n
+print(f'  pattern 1 (consulté le …)   : {n} remplacement(s)')
 
-# 3. Commentaire JS "mises à jour au X xxx[.] XXXX"
-html = re.sub(r'mises à jour au \d+\s+[\w.]+\s+\d{4}',
-              f'mises à jour au {date_fr}', html)
+# 2. "Mise à jour : X xxx[.] XXXX."  — \s* tolère espaces normaux et insécables
+html, n = re.subn(
+    r'Mise\s*à\s*jour\s*:\s*\d+\s+[\w.]+\s+\d{4}\.',
+    f'Mise à jour : {date_fr}.',
+    html)
+total += n
+print(f'  pattern 2 (Mise à jour …)    : {n} remplacement(s)')
+
+# 3. "mises à jour au X xxx[.] XXXX"  (commentaire JS)
+html, n = re.subn(
+    r'mises à jour au \d+\s+[\w.]+\s+\d{4}',
+    f'mises à jour au {date_fr}',
+    html)
+total += n
+print(f'  pattern 3 (mises à jour au…) : {n} remplacement(s)')
+
+if total == 0:
+    print(f'⚠ AUCUN remplacement — vérifier les patterns ou le contenu de index.html')
+    sys.exit(1)          # Fait échouer le step pour être visible dans les logs Actions
 
 with open('index.html', 'w', encoding='utf-8') as f:
     f.write(html)
 
-print(f'✓ index.html : dates mises à jour au {date_fr}')
+print(f'✓ index.html : {total} dates mises à jour au {date_fr}')
