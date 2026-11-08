@@ -62,14 +62,36 @@ jobs:
         # La date de consultation est lue automatiquement depuis sources.json
         run: python generate_og.py --out images/og_image.jpg
 
-      - name: Commiter les données et l'infographie
+      - name: Pousser candidats.json et sources.json (API GitHub, sans git)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add images/og_image.jpg candidats.json sources.json CHANGES.md || true
-          git pull --rebase --autostash origin main
-          git diff --cached --quiet || git commit -m "chore: infographie + sources $(date -u +%Y-%m-%d)"
-          git push
+          TODAY=$(date -u +%Y-%m-%d)
+          for FILE in candidats.json sources.json CHANGES.md; do
+            [ -f "$FILE" ] || continue
+            SHA=$(gh api /repos/$GITHUB_REPOSITORY/contents/$FILE --jq .sha 2>/dev/null || true)
+            python3 - "$FILE" "$SHA" "$TODAY" <<'PYEOF'
+import base64, json, sys, subprocess
+fpath, sha, today = sys.argv[1], sys.argv[2].strip(), sys.argv[3]
+content = base64.b64encode(open(fpath, "rb").read()).decode()
+payload = {"message": f"chore: {fpath} {today}", "content": content}
+if sha:
+    payload["sha"] = sha
+p = json.dumps(payload)
+import tempfile, os
+with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+    f.write(p)
+    tmp = f.name
+result = subprocess.run(
+    ["gh", "api", "--method", "PUT",
+     f"/repos/{os.environ['GITHUB_REPOSITORY']}/contents/{fpath}",
+     "--input", tmp, "--silent"],
+    check=True
+)
+os.unlink(tmp)
+print(f"✓ {fpath} mis à jour")
+PYEOF
+          done
 
       - name: Poster l'infographie sur climat2027.bsky.social
         run: python post_infographie_bsky.py --image images/og_image.jpg
