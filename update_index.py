@@ -1,12 +1,6 @@
 """
 Met à jour les dates de consultation dans index.html.
 Appelé par le workflow GitHub Actions après update_sources.py.
-
-Formats reconnus dans index.html :
-  <span class="date">consulté le 4 oct. 2026</span>
-  <span class="date">publié le 27 août 2026, consulté le 4 oct. 2026</span>
-  Mise à jour : 4 octobre 2026.
-  /* Données — mises à jour au 4 oct. 2026 */
 """
 import re, sys
 from datetime import date
@@ -22,7 +16,6 @@ with open('index.html', encoding='utf-8') as f:
 
 total = 0
 
-# 1. "consulté(e) le X xxx[.] XXXX"  — [\w.]+ capte oct. nov. déc. etc.
 html, n = re.subn(
     r'consultée? le \d+\s+[\w.]+\s+\d{4}',
     f'consulté le {date_fr}',
@@ -30,15 +23,13 @@ html, n = re.subn(
 total += n
 print(f'  pattern 1 (consulté le …)   : {n} remplacement(s)')
 
-# 2. "Mise à jour : X xxx[.] XXXX."  — \s* tolère espaces normaux et insécables
 html, n = re.subn(
     r'Mise\s*à\s*jour\s*:\s*\d+\s+[\w.]+\s+\d{4}\.',
-    f'Mise à jour : {date_fr}.',
+    f'Mise\u00a0à\u00a0jour\u00a0: {date_fr}.',
     html)
 total += n
 print(f'  pattern 2 (Mise à jour …)    : {n} remplacement(s)')
 
-# 3. "mises à jour au X xxx[.] XXXX"  (commentaire JS)
 html, n = re.subn(
     r'mises à jour au \d+\s+[\w.]+\s+\d{4}',
     f'mises à jour au {date_fr}',
@@ -47,8 +38,8 @@ total += n
 print(f'  pattern 3 (mises à jour au…) : {n} remplacement(s)')
 
 if total == 0:
-    print(f'⚠ AUCUN remplacement — vérifier les patterns ou le contenu de index.html')
-    sys.exit(1)          # Fait échouer le step pour être visible dans les logs Actions
+    print('⚠ AUCUN remplacement — vérifier les patterns ou le contenu de index.html')
+    sys.exit(1)
 
 with open('index.html', 'w', encoding='utf-8') as f:
     f.write(html)
