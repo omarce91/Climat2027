@@ -62,50 +62,41 @@ jobs:
         # La date de consultation est lue automatiquement depuis sources.json
         run: python generate_og.py --out images/og_image.jpg
 
-      - name: Commiter candidats.json et sources.json
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          mkdir -p /tmp/gen images
-          [ -f candidats.json ]      && cp candidats.json      /tmp/gen/ || true
-          [ -f sources.json ]        && cp sources.json        /tmp/gen/ || true
-          [ -f CHANGES.md ]          && cp CHANGES.md          /tmp/gen/ || true
-          [ -f images/og_image.jpg ] && cp images/og_image.jpg /tmp/gen/ || true
-          git fetch origin main
-          git reset --hard origin/main
-          mkdir -p images
-          [ -f /tmp/gen/candidats.json ]  && cp /tmp/gen/candidats.json  . || true
-          [ -f /tmp/gen/sources.json ]    && cp /tmp/gen/sources.json    . || true
-          [ -f /tmp/gen/CHANGES.md ]      && cp /tmp/gen/CHANGES.md      . || true
-          [ -f /tmp/gen/og_image.jpg ]    && cp /tmp/gen/og_image.jpg    images/ || true
-          git add candidats.json sources.json images/og_image.jpg CHANGES.md || true
-          git diff --cached --quiet || git commit -m "chore: infographie + sources $(date -u +%Y-%m-%d)"
-          git push
-
       - name: Poster l'infographie sur climat2027.bsky.social
         run: python post_infographie_bsky.py --image images/og_image.jpg
 
-      - name: Envoyer og_image.jpg sur climat2027.fr (SFTP Gandi)
+      - name: Envoyer og_image.jpg sur climat2027.fr (SFTP)
         env:
           SFTP_HOST: ${{ secrets.SFTP_HOST }}
           SFTP_USER: ${{ secrets.SFTP_USER }}
           SFTP_KEY:  ${{ secrets.SFTP_KEY }}
         run: |
-          sudo apt-get install -y lftp -q
           mkdir -p ~/.ssh
           echo "$SFTP_KEY" > ~/.ssh/gandi_deploy
           chmod 600 ~/.ssh/gandi_deploy
-          # Désactive la vérification du host au premier accès (clé inconnue sur runner)
           ssh-keyscan -H "$SFTP_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          printf "put images/og_image.jpg images/og_image.jpg\n" | \
+            sftp -i ~/.ssh/gandi_deploy \
+                 -o StrictHostKeyChecking=no \
+                 -b - "$SFTP_USER@$SFTP_HOST"
+          echo "✓ og_image.jpg envoyé sur $SFTP_HOST"
 
-          # Transfert SFTP via lftp (disponible sur ubuntu-latest)
-          lftp -u "$SFTP_USER", sftp://"$SFTP_HOST" <<LFTP
-            set sftp:connect-program "ssh -i ~/.ssh/gandi_deploy -o StrictHostKeyChecking=no"
-            set net:timeout 30
-            put images/og_image.jpg -o images/og_image.jpg
-            bye
-          LFTP
-          echo "✓ og_image.jpg envoyé sur $SFTP_HOST via SFTP"
+      - name: Commiter candidats.json et sources.json
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          mkdir -p /tmp/gen
+          [ -f candidats.json ] && cp candidats.json /tmp/gen/ || true
+          [ -f sources.json ]   && cp sources.json   /tmp/gen/ || true
+          [ -f CHANGES.md ]     && cp CHANGES.md     /tmp/gen/ || true
+          git fetch origin main
+          git reset --hard origin/main
+          [ -f /tmp/gen/candidats.json ] && cp /tmp/gen/candidats.json . || true
+          [ -f /tmp/gen/sources.json ]   && cp /tmp/gen/sources.json   . || true
+          [ -f /tmp/gen/CHANGES.md ]     && cp /tmp/gen/CHANGES.md     . || true
+          git add candidats.json sources.json CHANGES.md || true
+          git diff --cached --quiet || git commit -m "chore: sources $(date -u +%Y-%m-%d)"
+          git push
 
   # ── 2. Analyse des débats (transcripts dans transcripts/) ────────────────
   analyse_debats:
