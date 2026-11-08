@@ -51,6 +51,10 @@ jobs:
           }
           EOF
 
+      - name: Surveiller nouveaux candidats et sources
+        continue-on-error: true
+        run: python3 veille_candidats.py
+
       - name: Consulter les sources et mettre à jour candidats.json
         run: |
           python update_sources.py && echo "✓ sources mises à jour" || {
@@ -145,6 +149,7 @@ jobs:
           [ -f sources.json ]         && cp sources.json         /tmp/gen/        || true
           [ -f CHANGES.md ]           && cp CHANGES.md           /tmp/gen/        || true
           [ -f index.html ]           && cp index.html           /tmp/gen/        || true
+          [ -f veille.txt ]           && cp veille.txt           /tmp/gen/        || true
           [ -f images/archives.json ] && cp images/archives.json /tmp/gen/images/ || true
           git fetch origin main
           git reset --hard origin/main
@@ -152,9 +157,10 @@ jobs:
           [ -f /tmp/gen/sources.json ]         && cp /tmp/gen/sources.json         .       || true
           [ -f /tmp/gen/CHANGES.md ]           && cp /tmp/gen/CHANGES.md           .       || true
           [ -f /tmp/gen/index.html ]           && cp /tmp/gen/index.html           .       || true
+          [ -f /tmp/gen/veille.txt ]           && cp /tmp/gen/veille.txt           .       || true
           mkdir -p images
           [ -f /tmp/gen/images/archives.json ] && cp /tmp/gen/images/archives.json images/ || true
-          git add candidats.json sources.json CHANGES.md index.html images/archives.json || true
+          git add candidats.json sources.json CHANGES.md index.html images/archives.json veille.txt || true
           git diff --cached --quiet || git commit -m "chore: sources + index + archives $(date -u +%Y-%m-%d)"
           git push
 
