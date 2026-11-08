@@ -75,7 +75,7 @@ jobs:
           echo "$SFTP_KEY" > ~/.ssh/gandi_deploy
           chmod 600 ~/.ssh/gandi_deploy
           ssh-keyscan -H "$SFTP_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          printf "put images/og_image.jpg images/og_image.jpg\n" | \
+          printf "put images/og_image.jpg vhosts/climat2027.fr/htdocs/images/og_image.jpg\n" | \
             sftp -i ~/.ssh/gandi_deploy \
                  -o StrictHostKeyChecking=no \
                  -b - "$SFTP_USER@$SFTP_HOST"
