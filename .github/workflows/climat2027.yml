@@ -99,6 +99,9 @@ jobs:
           } > images/archives.html
           echo "✓ archives.html généré (${COUNT} infographies)"
 
+      - name: Mettre à jour les dates dans index.html
+        run: python3 update_index.py
+
       - name: Poster l'infographie sur climat2027.bsky.social
         run: python post_infographie_bsky.py --image images/og_image.jpg
 
@@ -113,15 +116,25 @@ jobs:
           echo "$SFTP_KEY" > ~/.ssh/gandi_deploy
           chmod 600 ~/.ssh/gandi_deploy
           ssh-keyscan -H "$SFTP_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          # .htaccess anti-cache pour og_image.jpg
           {
+            echo '<FilesMatch "og_image\.jpg$">'
+            echo '  Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"'
+            echo '  Header set Pragma "no-cache"'
+            echo '  Header set Expires "0"'
+            echo '</FilesMatch>'
+          } > /tmp/images_htaccess
+          {
+            echo "put index.html vhosts/climat2027.fr/htdocs/index.html"
             echo "put images/og_image.jpg vhosts/climat2027.fr/htdocs/images/og_image.jpg"
             echo "put images/og_image_${DATE}.jpg vhosts/climat2027.fr/htdocs/images/og_image_${DATE}.jpg"
             echo "put images/archives.html vhosts/climat2027.fr/htdocs/images/archives.html"
             echo "put images/archives.json vhosts/climat2027.fr/htdocs/images/archives.json"
+            echo "put /tmp/images_htaccess vhosts/climat2027.fr/htdocs/images/.htaccess"
           } | sftp -i ~/.ssh/gandi_deploy \
                    -o StrictHostKeyChecking=no \
                    -b - "$SFTP_USER@$SFTP_HOST"
-          echo "✓ images et archives envoyés sur $SFTP_HOST"
+          echo "✓ images, archives et .htaccess anti-cache envoyés sur $SFTP_HOST"
 
       - name: Commiter candidats.json, sources.json et archives
         run: |
@@ -131,16 +144,18 @@ jobs:
           [ -f candidats.json ]       && cp candidats.json       /tmp/gen/        || true
           [ -f sources.json ]         && cp sources.json         /tmp/gen/        || true
           [ -f CHANGES.md ]           && cp CHANGES.md           /tmp/gen/        || true
+          [ -f index.html ]           && cp index.html           /tmp/gen/        || true
           [ -f images/archives.json ] && cp images/archives.json /tmp/gen/images/ || true
           git fetch origin main
           git reset --hard origin/main
           [ -f /tmp/gen/candidats.json ]       && cp /tmp/gen/candidats.json       .       || true
           [ -f /tmp/gen/sources.json ]         && cp /tmp/gen/sources.json         .       || true
           [ -f /tmp/gen/CHANGES.md ]           && cp /tmp/gen/CHANGES.md           .       || true
+          [ -f /tmp/gen/index.html ]           && cp /tmp/gen/index.html           .       || true
           mkdir -p images
           [ -f /tmp/gen/images/archives.json ] && cp /tmp/gen/images/archives.json images/ || true
-          git add candidats.json sources.json CHANGES.md images/archives.json || true
-          git diff --cached --quiet || git commit -m "chore: sources + archives $(date -u +%Y-%m-%d)"
+          git add candidats.json sources.json CHANGES.md index.html images/archives.json || true
+          git diff --cached --quiet || git commit -m "chore: sources + index + archives $(date -u +%Y-%m-%d)"
           git push
 
   # ── 2. Analyse des débats (transcripts dans transcripts/) ────────────────
