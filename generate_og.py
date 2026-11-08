@@ -33,27 +33,37 @@ LBL     = "#7aaa88"
 INK     = "#9abfa2"
 MUTED   = "#4a7a5a"
 
+# Couleurs pastille nucléaire
+_NUK_COLOR = {"red": "#f04040", "orange": "#e6a000", "green": "#2e9e20"}
+
+# Facteurs d'échelle : points matplotlib par unité de données
+# fig : 12×6.3 in, axes : [0.055, 0.13, 0.91, 0.65], data : [-0.3, 10.3]×[-0.3, 10.3]
+_SCX = (12 * 0.91 * 72) / 10.6   # ≈ 74.1 pts/unité-x
+_SCY = (6.3 * 0.65 * 72) / 10.6  # ≈ 27.8 pts/unité-y
+
 # Données embarquées en fallback si candidats.json est absent
+# Champs : s=sigle, att=atténuation, adp=adaptation, b=budget (Mds€),
+#          mk=marker, c=couleur, nuk=nucléaire, h=horizon temporel [0-1], ann=annoncé
 _CANDIDATS_FALLBACK = [
-    {"s": "ÉELV",    "att": 9.2, "adp": 8.1, "b": 20,  "mk": "o", "c": "#4ecb71"},
-    {"s": "G.Éco",   "att": 8.1, "adp": 6.5, "b": 8,   "mk": "o", "c": "#4ecb71"},
-    {"s": "Glucks.", "att": 6.5, "adp": 7.9, "b": 28,  "mk": "o", "c": "#ff6eb4"},
-    {"s": "Deb.",    "att": 7.2, "adp": 5.5, "b": 12,  "mk": "o", "c": "#e84a2f"},
-    {"s": "LFI",     "att": 8.5, "adp": 7.6, "b": 40,  "mk": "h", "c": "#ff5555"},
-    {"s": "PCF",     "att": 6.4, "adp": 5.4, "b": 5,   "mk": "h", "c": "#ff5555"},
-    {"s": "LO",      "att": 4.0, "adp": 2.1, "b": 0.5, "mk": "h", "c": "#cc4444"},
-    {"s": "Hor.",    "att": 4.5, "adp": 8.3, "b": 2,   "mk": "h", "c": "#f0b429"},
-    {"s": "Ren.",    "att": 3.0, "adp": 4.4, "b": 1,   "mk": "h", "c": "#f0b429"},
-    {"s": "Ind.",    "att": 3.6, "adp": 4.1, "b": 0.5, "mk": "h", "c": "#f0b429"},
-    {"s": "LR",      "att": 2.6, "adp": 4.0, "b": 0.5, "mk": "h", "c": "#5b9bd5"},
-    {"s": "LR",      "att": 2.4, "adp": 3.4, "b": 0.5, "mk": "h", "c": "#5b9bd5"},
-    {"s": "Ind.D",   "att": 1.7, "adp": 2.7, "b": 0.3, "mk": "^", "c": "#5b9bd5"},
-    {"s": "RN",      "att": 0.9, "adp": 1.9, "b": 0.2, "mk": "^", "c": "#8899cc"},
-    {"s": "Rec.",    "att": 0.4, "adp": 0.8, "b": 0.1, "mk": "^", "c": "#8899cc"},
-    {"s": "DLF",     "att": 1.1, "adp": 1.2, "b": 0.2, "mk": "^", "c": "#8899cc"},
-    {"s": "Pat.",    "att": 0.8, "adp": 1.0, "b": 0.1, "mk": "^", "c": "#8899cc"},
-    {"s": "UPR",     "att": 2.2, "adp": 2.8, "b": 0.2, "mk": "^", "c": "#8899cc"},
-    {"s": "LFH",     "att": 3.8, "adp": 5.0, "b": 0.8, "mk": "h", "c": "#f0b429"},
+    {"s": "ÉELV",    "att": 9.2, "adp": 8.1, "b": 20,  "mk": "o", "c": "#4ecb71", "nuk": "red",    "h": .90, "ann": False},
+    {"s": "G.Éco",   "att": 8.1, "adp": 6.5, "b": 8,   "mk": "o", "c": "#4ecb71", "nuk": "red",    "h": .85, "ann": False},
+    {"s": "Glucks.", "att": 6.5, "adp": 7.9, "b": 10,  "mk": "o", "c": "#ff6eb4", "nuk": "orange", "h": .72, "ann": False},
+    {"s": "Deb.",    "att": 7.2, "adp": 5.5, "b": 12,  "mk": "h", "c": "#e84a2f", "nuk": "red",    "h": .68, "ann": False},
+    {"s": "LFI",     "att": 8.5, "adp": 7.6, "b": 40,  "mk": "h", "c": "#ff5555", "nuk": "orange", "h": .75, "ann": True},
+    {"s": "PCF",     "att": 6.4, "adp": 5.4, "b": 5,   "mk": "h", "c": "#ff5555", "nuk": "green",  "h": .60, "ann": False},
+    {"s": "LO",      "att": 4.0, "adp": 2.1, "b": 0.5, "mk": "h", "c": "#cc4444", "nuk": "red",    "h": .42, "ann": False},
+    {"s": "Hor.",    "att": 4.5, "adp": 8.3, "b": 2,   "mk": "h", "c": "#f0b429", "nuk": "green",  "h": .62, "ann": True},
+    {"s": "Ren.",    "att": 3.0, "adp": 4.4, "b": 1,   "mk": "h", "c": "#f0b429", "nuk": "green",  "h": .34, "ann": False},
+    {"s": "Ind.",    "att": 3.6, "adp": 4.1, "b": 0.5, "mk": "h", "c": "#f0b429", "nuk": "green",  "h": .30, "ann": False},
+    {"s": "LR",      "att": 2.6, "adp": 4.0, "b": 0.5, "mk": "h", "c": "#5b9bd5", "nuk": "green",  "h": .25, "ann": False},
+    {"s": "LR",      "att": 2.4, "adp": 3.4, "b": 0.5, "mk": "h", "c": "#5b9bd5", "nuk": "green",  "h": .25, "ann": False},
+    {"s": "Ind.D",   "att": 1.7, "adp": 2.7, "b": 0.3, "mk": "^", "c": "#5b9bd5", "nuk": "green",  "h": .20, "ann": False},
+    {"s": "RN",      "att": 0.9, "adp": 1.9, "b": 0.2, "mk": "^", "c": "#8899cc", "nuk": "green",  "h": .16, "ann": False},
+    {"s": "Rec.",    "att": 0.4, "adp": 0.8, "b": 0.1, "mk": "^", "c": "#8899cc", "nuk": "green",  "h": .10, "ann": False},
+    {"s": "DLF",     "att": 1.1, "adp": 1.2, "b": 0.2, "mk": "^", "c": "#8899cc", "nuk": "green",  "h": .18, "ann": False},
+    {"s": "Pat.",    "att": 0.8, "adp": 1.0, "b": 0.1, "mk": "^", "c": "#8899cc", "nuk": "green",  "h": .10, "ann": False},
+    {"s": "UPR",     "att": 2.2, "adp": 2.8, "b": 0.2, "mk": "^", "c": "#8899cc", "nuk": "green",  "h": .45, "ann": False},
+    {"s": "LFH",     "att": 3.8, "adp": 5.0, "b": 0.8, "mk": "h", "c": "#f0b429", "nuk": "orange", "h": .55, "ann": False},
 ]
 
 
@@ -150,45 +160,87 @@ def generate(output: Path, sources_date: str | None = None) -> None:
         ax.text(x, y, txt, color="#2a4a36", fontsize=7,
                 ha="left" if x > 5 else "right")
 
+    # ── Dessin des candidats ─────────────────────────────────────────
     for c in CANDIDATS:
-        r  = max(6, 3.5 + math.sqrt(c["b"]) * 4.2)
-        sz = (r * 1.8) ** 2
+        r   = max(6, 3.5 + math.sqrt(c["b"]) * 4.2)
+        sz  = (r * 1.8) ** 2
+
+        # 1. Forme principale — contour blanc si budget annoncé (sinon estimé)
+        ec  = "white" if c.get("ann") else "none"
+        lw  = 1.8     if c.get("ann") else 0
         ax.scatter(c["att"], c["adp"], s=sz, c=c["c"],
-                   marker=c["mk"], alpha=0.88, edgecolors="none", zorder=3)
+                   marker=c["mk"], alpha=0.88,
+                   edgecolors=ec, linewidths=lw, zorder=3)
+
+        # 2. Barre horizon temporel (sous le cercle, en coordonnées données)
+        h_val = c.get("h", 0.5)
+        hw    = r * 0.9 / _SCX              # demi-largeur en unités x
+        dy    = (r * 0.9 + 7) / _SCY        # décalage vers le bas en unités y
+        by    = c["adp"] - dy
+        bc    = ("#2e9e20" if h_val > 0.65
+                 else "#e6a000" if h_val > 0.40
+                 else "#f04040")
+        # Fond sombre (toute la largeur)
+        ax.plot([c["att"] - hw, c["att"] + hw], [by, by],
+                color="#1e3826", lw=3, solid_capstyle="butt", zorder=4)
+        # Remplissage coloré proportionnel à h_val
+        ax.plot([c["att"] - hw, c["att"] - hw + 2 * hw * h_val], [by, by],
+                color=bc, lw=3, solid_capstyle="butt", zorder=5)
+
+        # 3. Pastille nucléaire (petit cercle centré sur le candidat)
+        nuk_col = _NUK_COLOR.get(c.get("nuk", "green"), "#2e9e20")
+        nr      = max(2.5, r * 0.27)
+        ax.scatter(c["att"], c["adp"], s=(nr * 1.8) ** 2, c=nuk_col,
+                   marker="o", edgecolors="white", linewidths=0.6, zorder=6)
+
+        # 4. Étiquette au-dessus
         off = r * 1.8 * 0.55 + 4
         ax.annotate(c["s"], (c["att"], c["adp"]),
                     textcoords="offset points", xytext=(0, off),
                     ha="center", fontsize=6.5, color=INK,
-                    fontweight="500", zorder=4)
+                    fontweight="500", zorder=7)
 
+    # ── Légende (2 colonnes) ─────────────────────────────────────────
+    # Colonne 1 : couleurs politiques  |  Colonne 2 : nucléaire + horizon + budget
     leg_el = [
         mlines.Line2D([], [], marker="o", ls="", c="#4ecb71", ms=7, label="Écologistes"),
+        mlines.Line2D([], [], marker="o", ls="", c="#f04040", ms=5,
+                      mec="white", mew=0.6, label="● Anti-nucl."),
         mlines.Line2D([], [], marker="h", ls="", c="#ff5555", ms=7, label="LFI/PCF"),
+        mlines.Line2D([], [], marker="o", ls="", c="#e6a000", ms=5,
+                      mec="white", mew=0.6, label="● Mixte"),
         mlines.Line2D([], [], marker="h", ls="", c="#ff6eb4", ms=7, label="PS/PP"),
+        mlines.Line2D([], [], marker="o", ls="", c="#2e9e20", ms=5,
+                      mec="white", mew=0.6, label="● Pro-nucl."),
         mlines.Line2D([], [], marker="h", ls="", c="#f0b429", ms=7, label="Centre"),
+        mlines.Line2D([], [], ls="-", c="#f04040", lw=2, label="— Court terme"),
         mlines.Line2D([], [], marker="h", ls="", c="#5b9bd5", ms=7, label="Droite"),
+        mlines.Line2D([], [], ls="-", c="#2e9e20", lw=2, label="— Long terme"),
         mlines.Line2D([], [], marker="^", ls="", c="#8899cc", ms=7, label="Extr. droite"),
+        mlines.Line2D([], [], marker="o", ls="", c="#888888", ms=7,
+                      mec="white", mew=1.5, label="Contour = annoncé"),
     ]
-    ax.legend(handles=leg_el, loc="lower right", fontsize=7,
+    ax.legend(handles=leg_el, loc="lower right", fontsize=6.5, ncol=2,
               facecolor="#1a3020", edgecolor="#2a4a36",
               labelcolor=INK, framealpha=0.92,
-              borderpad=0.6, handlelength=1.2, handletextpad=0.5)
+              borderpad=0.6, handlelength=1.2, handletextpad=0.5,
+              columnspacing=0.8)
 
-    # En-tête
+    # ── En-tête ──────────────────────────────────────────────────────
     fig.text(0.055, 0.975, "#Climat2027",
              fontsize=21, fontweight="bold", color=ACCENT, ha="left", va="top")
     fig.text(0.055, 0.893,
              "Comparaison des programmes des candidats déclarés concernant le climat.",
              fontsize=9.5, color=LBL, ha="left", va="top")
 
-    # Pied — ligne principale
+    # ── Pied — ligne principale ───────────────────────────────────────
     fig.text(0.055, 0.025,
              f"{date_str}  ·  {sundays} dimanches avant le 1er tour  ·  18 avril 2027",
              fontsize=7.5, color=MUTED, ha="left", va="bottom")
     fig.text(0.955, 0.025, "climat2027.fr",
              fontsize=9, color=ACCENT, ha="right", va="bottom", fontweight="bold")
 
-    # Pied — sources (si date disponible)
+    # ── Pied — sources (si date disponible) ──────────────────────────
     if sources_date:
         sources_label = " · ".join(source_names[:3])  # max 3 noms pour ne pas déborder
         fig.text(0.055, 0.005,
