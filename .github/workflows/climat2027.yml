@@ -69,10 +69,7 @@ jobs:
           git fetch origin
           git rebase origin/main
           git add images/og_image.jpg candidats.json sources.json CHANGES.md || true
-          git diff --cached --quiet || git commit -m "chore: infographie + sources $(date -u +%Y-%m-%d)
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01X2xewz8ASP19ZeYxa3zuxX"
+          git diff --cached --quiet || git commit -m "chore: infographie + sources $(date -u +%Y-%m-%d)"
           git push
 
       - name: Poster l'infographie sur climat2027.bsky.social
