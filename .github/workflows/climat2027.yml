@@ -63,40 +63,84 @@ jobs:
         # La date de consultation est lue automatiquement depuis sources.json
         run: python generate_og.py --out images/og_image.jpg
 
+      - name: Archiver og_image.jpg et générer l'historique
+        run: |
+          DATE=$(date -u +%Y-%m-%d)
+          cp images/og_image.jpg "images/og_image_${DATE}.jpg"
+          echo "✓ og_image_${DATE}.jpg créé"
+
+          # Initialiser archives.json si absent
+          [ -f images/archives.json ] || echo '[]' > images/archives.json
+
+          # Ajouter l'entrée si pas déjà présente
+          URL="https://climat2027.fr/images/og_image_${DATE}.jpg"
+          if ! jq -e --arg d "$DATE" 'any(.[]; .date == $d)' images/archives.json >/dev/null 2>&1; then
+            TMP=$(mktemp)
+            jq --arg d "$DATE" --arg u "$URL" '[{"date": $d, "url": $u}] + .' images/archives.json > "$TMP"
+            mv "$TMP" images/archives.json
+            echo "✓ archives.json: $(jq length images/archives.json) entrées"
+          else
+            echo "ℹ archives.json: entrée $DATE déjà présente"
+          fi
+
+          # Générer archives.html
+          COUNT=$(jq length images/archives.json)
+          {
+            echo '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">'
+            echo '<title>Historique des infographies — #Climat2027</title>'
+            echo '<meta name="viewport" content="width=device-width,initial-scale=1">'
+            echo '<style>body{font-family:sans-serif;max-width:960px;margin:2rem auto;padding:0 1rem;background:#1a1a2e;color:#eee}h1{color:#4ade80}a{color:#86efac}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.5rem;margin-top:2rem}.card{background:#0f3460;border-radius:8px;overflow:hidden}.card img{width:100%;display:block}.card p{padding:.5rem 1rem;margin:0;font-size:.85rem;color:#aaa}</style>'
+            echo '</head><body>'
+            echo '<h1>#Climat2027 — Historique des infographies</h1>'
+            echo "<p>${COUNT} infographie(s) — <a href=\"/\">← Retour à l'accueil</a></p>"
+            echo '<div class="grid">'
+            jq -r '.[] | "<div class=\"card\"><a href=\"\(.url)\"><img src=\"\(.url)\" alt=\"Infographie \(.date)\" loading=\"lazy\"></a><p>\(.date)</p></div>"' images/archives.json
+            echo '</div></body></html>'
+          } > images/archives.html
+          echo "✓ archives.html généré (${COUNT} infographies)"
+
       - name: Poster l'infographie sur climat2027.bsky.social
         run: python post_infographie_bsky.py --image images/og_image.jpg
 
-      - name: Envoyer og_image.jpg sur climat2027.fr (SFTP)
+      - name: Envoyer les images et archives sur climat2027.fr (SFTP)
         env:
           SFTP_HOST: ${{ secrets.SFTP_HOST }}
           SFTP_USER: ${{ secrets.SFTP_USER }}
           SFTP_KEY:  ${{ secrets.SFTP_KEY }}
         run: |
+          DATE=$(date -u +%Y-%m-%d)
           mkdir -p ~/.ssh
           echo "$SFTP_KEY" > ~/.ssh/gandi_deploy
           chmod 600 ~/.ssh/gandi_deploy
           ssh-keyscan -H "$SFTP_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-          printf "put images/og_image.jpg vhosts/climat2027.fr/htdocs/images/og_image.jpg\n" | \
-            sftp -i ~/.ssh/gandi_deploy \
-                 -o StrictHostKeyChecking=no \
-                 -b - "$SFTP_USER@$SFTP_HOST"
-          echo "✓ og_image.jpg envoyé sur $SFTP_HOST"
+          {
+            echo "put images/og_image.jpg vhosts/climat2027.fr/htdocs/images/og_image.jpg"
+            echo "put images/og_image_${DATE}.jpg vhosts/climat2027.fr/htdocs/images/og_image_${DATE}.jpg"
+            echo "put images/archives.html vhosts/climat2027.fr/htdocs/images/archives.html"
+            echo "put images/archives.json vhosts/climat2027.fr/htdocs/images/archives.json"
+          } | sftp -i ~/.ssh/gandi_deploy \
+                   -o StrictHostKeyChecking=no \
+                   -b - "$SFTP_USER@$SFTP_HOST"
+          echo "✓ images et archives envoyés sur $SFTP_HOST"
 
-      - name: Commiter candidats.json et sources.json
+      - name: Commiter candidats.json, sources.json et archives
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          mkdir -p /tmp/gen
-          [ -f candidats.json ] && cp candidats.json /tmp/gen/ || true
-          [ -f sources.json ]   && cp sources.json   /tmp/gen/ || true
-          [ -f CHANGES.md ]     && cp CHANGES.md     /tmp/gen/ || true
+          mkdir -p /tmp/gen/images
+          [ -f candidats.json ]       && cp candidats.json       /tmp/gen/        || true
+          [ -f sources.json ]         && cp sources.json         /tmp/gen/        || true
+          [ -f CHANGES.md ]           && cp CHANGES.md           /tmp/gen/        || true
+          [ -f images/archives.json ] && cp images/archives.json /tmp/gen/images/ || true
           git fetch origin main
           git reset --hard origin/main
-          [ -f /tmp/gen/candidats.json ] && cp /tmp/gen/candidats.json . || true
-          [ -f /tmp/gen/sources.json ]   && cp /tmp/gen/sources.json   . || true
-          [ -f /tmp/gen/CHANGES.md ]     && cp /tmp/gen/CHANGES.md     . || true
-          git add candidats.json sources.json CHANGES.md || true
-          git diff --cached --quiet || git commit -m "chore: sources $(date -u +%Y-%m-%d)"
+          [ -f /tmp/gen/candidats.json ]       && cp /tmp/gen/candidats.json       .       || true
+          [ -f /tmp/gen/sources.json ]         && cp /tmp/gen/sources.json         .       || true
+          [ -f /tmp/gen/CHANGES.md ]           && cp /tmp/gen/CHANGES.md           .       || true
+          mkdir -p images
+          [ -f /tmp/gen/images/archives.json ] && cp /tmp/gen/images/archives.json images/ || true
+          git add candidats.json sources.json CHANGES.md images/archives.json || true
+          git diff --cached --quiet || git commit -m "chore: sources + archives $(date -u +%Y-%m-%d)"
           git push
 
   # ── 2. Analyse des débats (transcripts dans transcripts/) ────────────────
