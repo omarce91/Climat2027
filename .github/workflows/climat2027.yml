@@ -90,7 +90,7 @@ jobs:
           SFTP_USER: ${{ secrets.SFTP_USER }}
           SFTP_KEY:  ${{ secrets.SFTP_KEY }}
         run: |
-          # Installe la clé privée SSH
+          sudo apt-get install -y lftp -q
           mkdir -p ~/.ssh
           echo "$SFTP_KEY" > ~/.ssh/gandi_deploy
           chmod 600 ~/.ssh/gandi_deploy
