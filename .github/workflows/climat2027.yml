@@ -176,6 +176,10 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Récupérer les nouveaux transcripts
+        continue-on-error: true
+        run: python3 fetch_transcripts.py --output transcripts/ --max 10
+
       - name: Analyser les transcripts
         run: |
           if [ -d transcripts ] && ls transcripts/*.{txt,json} 1>/dev/null 2>&1; then
@@ -185,13 +189,14 @@ jobs:
             python analyse_debats.py --demo --output debats_stats.json
           fi
 
-      - name: Commiter debats_stats.json si modifié
+      - name: Commiter debats_stats.json et transcripts si modifiés
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add debats_stats.json || true
+          git add transcripts/*.json transcripts/*.txt 2>/dev/null || true
           git pull --rebase --autostash origin main
-          git diff --cached --quiet || git commit -m "data: debats_stats.json $(date -u +%Y-%m-%d)"
+          git diff --cached --quiet || git commit -m "data: debats_stats + transcripts $(date -u +%Y-%m-%d)"
           git push
 
   # ── 3. Carte GASPAR + post Bluesky ──────────────────────────────────────
