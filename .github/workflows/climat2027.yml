@@ -73,6 +73,7 @@ jobs:
           [ -f images/og_image.jpg ] && cp images/og_image.jpg /tmp/gen/ || true
           git fetch origin main
           git reset --hard origin/main
+          mkdir -p images
           [ -f /tmp/gen/candidats.json ]  && cp /tmp/gen/candidats.json  . || true
           [ -f /tmp/gen/sources.json ]    && cp /tmp/gen/sources.json    . || true
           [ -f /tmp/gen/CHANGES.md ]      && cp /tmp/gen/CHANGES.md      . || true
@@ -101,7 +102,6 @@ jobs:
           lftp -u "$SFTP_USER", sftp://"$SFTP_HOST" <<LFTP
             set sftp:connect-program "ssh -i ~/.ssh/gandi_deploy -o StrictHostKeyChecking=no"
             set net:timeout 30
-            mkdir -p images
             put images/og_image.jpg -o images/og_image.jpg
             bye
           LFTP
