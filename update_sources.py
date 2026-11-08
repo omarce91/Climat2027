@@ -122,7 +122,8 @@ def mistral_analyze(source_texts: dict[str, str],
     try:
         from mistralai import Mistral
     except ImportError:
-        sys.exit("pip install mistralai")
+        print("[erreur] mistralai non installé — pip install mistralai")
+        return
 
     # Résumé des scores actuels
     scores_txt = "\n".join(
@@ -288,9 +289,11 @@ def main() -> None:
 
     # ── Chargement ────────────────────────────────────────────────────────────
     if not SOURCES_FILE.exists():
-        sys.exit(f"Fichier introuvable : {SOURCES_FILE}")
+        print(f"[avertissement] {SOURCES_FILE} introuvable — consultation ignorée.")
+        return
     if not CANDIDATS_FILE.exists():
-        sys.exit(f"Fichier introuvable : {CANDIDATS_FILE}")
+        print(f"[avertissement] {CANDIDATS_FILE} introuvable — consultation ignorée.")
+        return
 
     sources_data  = load_json(SOURCES_FILE)
     candidats_data = load_json(CANDIDATS_FILE)
