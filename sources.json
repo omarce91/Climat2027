@@ -1,0 +1,41 @@
+{
+  "_comment": "Sources consultées pour évaluer les positions des candidats sur le climat",
+  "last_consulted": "2026-10-04",
+  "sources": [
+    {
+      "name": "ÉlyséeScope",
+      "url": "https://www.elyseescope.com",
+      "description": "Comparateur des programmes des candidats à la présidentielle 2027",
+      "theme_climate": "environnement",
+      "active": true
+    },
+    {
+      "name": "Le Monde — Présidentielle 2027",
+      "url": "https://www.lemonde.fr/presidentielle-2027/",
+      "description": "Suivi éditorial de la campagne",
+      "theme_climate": "climat",
+      "active": true
+    },
+    {
+      "name": "Bon Pote — Comparateur candidats",
+      "url": "https://bonpote.com",
+      "description": "Analyse des programmes environnementaux des candidats",
+      "theme_climate": "environnement",
+      "active": true
+    },
+    {
+      "name": "Réseau Action Climat — Comparatif",
+      "url": "https://reseauactionclimat.org",
+      "description": "Évaluations des programmes climat des candidats par le RAC",
+      "theme_climate": "climat",
+      "active": true
+    },
+    {
+      "name": "Wikipedia — Présidentielle française 2027",
+      "url": "https://fr.wikipedia.org/wiki/%C3%89lection_pr%C3%A9sidentielle_fran%C3%A7aise_de_2027",
+      "description": "Liste des candidats déclarés et intentions de vote",
+      "theme_climate": null,
+      "active": true
+    }
+  ]
+}

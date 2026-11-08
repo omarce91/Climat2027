@@ -5,23 +5,39 @@ Génère l'image Open Graph (og_image.jpg, 1200×630 px) pour #Climat2027.
 Lance chaque dimanche par GitHub Actions pour mettre à jour la date
 et le compte à rebours avant le 1er tour (18 avril 2027).
 
+Les données des candidats sont lues depuis candidats.json.
+La date de consultation des sources est lue depuis sources.json
+(ou surchargée par --sources-date).
+
 Usage :
     python generate_og.py                        # → images/og_image.jpg
     python generate_og.py --out autre/chemin.jpg
+    python generate_og.py --sources-date "8 novembre 2026"
 """
 
 import argparse
+import json
 import math
 from datetime import date, timedelta
 from pathlib import Path
 
-# ── Données candidats (positions au 1 nov. 2026) ──────────────────────
-# Màj : Glucksmann désigné candidat gauche soc.-démo. (primaire 11 oct., 66,2 %)
-# Màj : PP/PS fusionnés sous Glucksmann — bulle rehaussée ; PS (Faure) éliminé
-CANDIDATS = [
+PREMIER_TOUR    = date(2027, 4, 18)
+CANDIDATS_FILE  = Path("candidats.json")
+SOURCES_FILE    = Path("sources.json")
+
+BG      = "#132218"
+BGC     = "#0f1c13"
+GRID    = "#1e3826"
+ACCENT  = "#4ecb71"
+LBL     = "#7aaa88"
+INK     = "#9abfa2"
+MUTED   = "#4a7a5a"
+
+# Données embarquées en fallback si candidats.json est absent
+_CANDIDATS_FALLBACK = [
     {"s": "ÉELV",    "att": 9.2, "adp": 8.1, "b": 20,  "mk": "o", "c": "#4ecb71"},
     {"s": "G.Éco",   "att": 8.1, "adp": 6.5, "b": 8,   "mk": "o", "c": "#4ecb71"},
-    {"s": "Glucks.", "att": 6.5, "adp": 7.9, "b": 28,  "mk": "o", "c": "#ff6eb4"},  # PS+PP — vainqueur primaire
+    {"s": "Glucks.", "att": 6.5, "adp": 7.9, "b": 28,  "mk": "o", "c": "#ff6eb4"},
     {"s": "Deb.",    "att": 7.2, "adp": 5.5, "b": 12,  "mk": "o", "c": "#e84a2f"},
     {"s": "LFI",     "att": 8.5, "adp": 7.6, "b": 40,  "mk": "h", "c": "#ff5555"},
     {"s": "PCF",     "att": 6.4, "adp": 5.4, "b": 5,   "mk": "h", "c": "#ff5555"},
@@ -40,15 +56,37 @@ CANDIDATS = [
     {"s": "LFH",     "att": 3.8, "adp": 5.0, "b": 0.8, "mk": "h", "c": "#f0b429"},
 ]
 
-PREMIER_TOUR = date(2027, 4, 18)
 
-BG      = "#132218"
-BGC     = "#0f1c13"
-GRID    = "#1e3826"
-ACCENT  = "#4ecb71"
-LBL     = "#7aaa88"
-INK     = "#9abfa2"
-MUTED   = "#4a7a5a"
+def load_candidats() -> list[dict]:
+    if CANDIDATS_FILE.exists():
+        try:
+            data = json.loads(CANDIDATS_FILE.read_text())
+            return data["candidats"]
+        except Exception as e:
+            print(f"[avertissement] Lecture candidats.json : {e} — données embarquées utilisées.")
+    return _CANDIDATS_FALLBACK
+
+
+def load_sources_date() -> str | None:
+    """Retourne la date de dernière consultation des sources depuis sources.json."""
+    if SOURCES_FILE.exists():
+        try:
+            data = json.loads(SOURCES_FILE.read_text())
+            return data.get("last_consulted")
+        except Exception:
+            pass
+    return None
+
+
+def load_sources_names() -> list[str]:
+    """Retourne les noms des sources actives."""
+    if SOURCES_FILE.exists():
+        try:
+            data = json.loads(SOURCES_FILE.read_text())
+            return [s["name"] for s in data.get("sources", []) if s.get("active")]
+        except Exception:
+            pass
+    return ["ÉlyséeScope"]
 
 
 def count_sundays(start: date, end: date) -> int:
@@ -67,9 +105,16 @@ def generate(output: Path, sources_date: str | None = None) -> None:
     import matplotlib.pyplot as plt
     import matplotlib.lines as mlines
 
+    CANDIDATS = load_candidats()
+
+    # Date de consultation : argument CLI > sources.json
+    if sources_date is None:
+        sources_date = load_sources_date()
+
+    source_names = load_sources_names()
+
     today    = date.today()
     sundays  = count_sundays(today, PREMIER_TOUR)
-    date_str = today.strftime("%-d %B %Y")          # Linux
     try:
         date_str = today.strftime("%-d %B %Y")
     except ValueError:
@@ -136,17 +181,18 @@ def generate(output: Path, sources_date: str | None = None) -> None:
              "Comparaison des programmes des candidats déclarés concernant le climat.",
              fontsize=9.5, color=LBL, ha="left", va="top")
 
-    # Pied
+    # Pied — ligne principale
     fig.text(0.055, 0.025,
              f"{date_str}  ·  {sundays} dimanches avant le 1er tour  ·  18 avril 2027",
              fontsize=7.5, color=MUTED, ha="left", va="bottom")
     fig.text(0.955, 0.025, "climat2027.fr",
              fontsize=9, color=ACCENT, ha="right", va="bottom", fontweight="bold")
 
-    # Sources (optionnel)
+    # Pied — sources (si date disponible)
     if sources_date:
+        sources_label = " · ".join(source_names[:3])  # max 3 noms pour ne pas déborder
         fig.text(0.055, 0.005,
-                 f"Sources : elyseescope.com · consultées le {sources_date}",
+                 f"Sources : {sources_label} · consultées le {sources_date}",
                  fontsize=6, color=MUTED, ha="left", va="bottom")
 
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -164,8 +210,8 @@ def main() -> None:
     parser.add_argument("--out", default="images/og_image.jpg",
                         help="Chemin de sortie (défaut : images/og_image.jpg)")
     parser.add_argument("--sources-date", default=None, dest="sources_date",
-                        help="Date de consultation des sources affichée dans le pied "
-                             "(ex: '7 novembre 2026'). Si absent, aucune ligne sources.")
+                        help="Surcharge la date de consultation des sources (ex: '8 novembre 2026'). "
+                             "Si absent, lue depuis sources.json.")
     args = parser.parse_args()
     generate(Path(args.out), sources_date=args.sources_date)
 
