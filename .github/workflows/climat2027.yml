@@ -71,6 +71,7 @@ jobs:
 
 Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01X2xewz8ASP19ZeYxa3zuxX"
+          git pull --rebase origin HEAD
           git push
 
       - name: Poster l'infographie sur climat2027.bsky.social
@@ -129,6 +130,7 @@ Claude-Session: https://claude.ai/code/session_01X2xewz8ASP19ZeYxa3zuxX"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add debats_stats.json
           git diff --cached --quiet || git commit -m "data: debats_stats.json $(date -u +%Y-%m-%d)"
+          git pull --rebase origin HEAD
           git push
 
   # ── 3. Carte GASPAR + post Bluesky ──────────────────────────────────────
@@ -176,6 +178,7 @@ Claude-Session: https://claude.ai/code/session_01X2xewz8ASP19ZeYxa3zuxX"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f gaspar_map_state.json omarce_repost_state.json commune_coords_cache.json || true
           git diff --cached --quiet || git commit -m "state: gaspar+repost $(date -u +%Y-%m-%d)"
+          git pull --rebase origin HEAD
           git push
 
   # ── 4. Post quotidien Bluesky (likes → reply + repost omarce) ───────────
@@ -222,4 +225,5 @@ Claude-Session: https://claude.ai/code/session_01X2xewz8ASP19ZeYxa3zuxX"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -f omarce_repost_state.json c27_reply_state.json || true
           git diff --cached --quiet || git commit -m "state: omarce_repost+c27_reply $(date -u +%Y-%m-%d)"
+          git pull --rebase origin HEAD
           git push
