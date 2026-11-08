@@ -67,7 +67,7 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin
-          git rebase origin/HEAD
+          git rebase origin/main
           git add images/og_image.jpg candidats.json sources.json CHANGES.md || true
           git diff --cached --quiet || git commit -m "chore: infographie + sources $(date -u +%Y-%m-%d)
 
@@ -130,7 +130,7 @@ Claude-Session: https://claude.ai/code/session_01X2xewz8ASP19ZeYxa3zuxX"
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin
-          git rebase origin/HEAD
+          git rebase origin/main
           git add debats_stats.json
           git diff --cached --quiet || git commit -m "data: debats_stats.json $(date -u +%Y-%m-%d)"
           git push
@@ -179,7 +179,7 @@ Claude-Session: https://claude.ai/code/session_01X2xewz8ASP19ZeYxa3zuxX"
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin
-          git rebase origin/HEAD
+          git rebase origin/main
           git add -f gaspar_map_state.json omarce_repost_state.json commune_coords_cache.json || true
           git diff --cached --quiet || git commit -m "state: gaspar+repost $(date -u +%Y-%m-%d)"
           git push
@@ -227,7 +227,7 @@ Claude-Session: https://claude.ai/code/session_01X2xewz8ASP19ZeYxa3zuxX"
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin
-          git rebase origin/HEAD
+          git rebase origin/main
           git add -f omarce_repost_state.json c27_reply_state.json || true
           git diff --cached --quiet || git commit -m "state: omarce_repost+c27_reply $(date -u +%Y-%m-%d)"
           git push
