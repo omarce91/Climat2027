@@ -52,8 +52,12 @@ jobs:
           EOF
 
       - name: Consulter les sources et mettre à jour candidats.json
-        continue-on-error: true   # échec de consultation = warning, pas arrêt du job
-        run: python update_sources.py
+        run: |
+          python update_sources.py && echo "✓ sources mises à jour" || {
+            echo "⚠️  update_sources.py a échoué — vérifier les logs ci-dessus"
+            echo "   L'infographie sera générée avec les données existantes"
+            exit 0
+          }
 
       - name: Générer og_image.jpg
         # La date de consultation est lue automatiquement depuis sources.json
