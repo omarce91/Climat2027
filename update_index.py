@@ -14,14 +14,18 @@ date_fr = f'{d.day} {MONTHS[d.month-1]} {d.year}'
 with open('index.html', encoding='utf-8') as f:
     html = f.read()
 
-# 1. Toutes les occurrences "consulté le X xxx XXXX" → aujourd'hui
-html = re.sub(r'consulté le \d+\s+\w+\s+\d{4}', f'consulté le {date_fr}', html)
+# 1. "consultée? le X xxx[.] XXXX" → aujourd'hui
+#    [\w.]+ capte les mois abrégés (oct., nov. …) ; e? capte les deux genres
+html = re.sub(r'consultée? le \d+\s+[\w.]+\s+\d{4}',
+              lambda m: m.group(0).split(' le ')[0] + f' le {date_fr}', html)
 
-# 2. "Mise à jour : X xxx XXXX." → aujourd'hui
-html = re.sub(r'Mise à jour\s*:\s*\d+\s+\w+\s+\d{4}\.', f'Mise à jour : {date_fr}.', html)
+# 2. "Mise à jour : X xxx[.] XXXX." → aujourd'hui (espace insécable avant :)
+html = re.sub(r'Mise\s*à\s*jour\s*:\s*\d+\s+[\w.]+\s+\d{4}\.',
+              f'Mise à jour : {date_fr}.', html)
 
-# 3. Commentaire JS "/* Données — mises à jour au X xxx XXXX */"
-html = re.sub(r'mises à jour au \d+\s+\w+\s+\d{4}', f'mises à jour au {date_fr}', html)
+# 3. Commentaire JS "mises à jour au X xxx[.] XXXX"
+html = re.sub(r'mises à jour au \d+\s+[\w.]+\s+\d{4}',
+              f'mises à jour au {date_fr}', html)
 
 with open('index.html', 'w', encoding='utf-8') as f:
     f.write(html)
