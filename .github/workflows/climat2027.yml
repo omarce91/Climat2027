@@ -38,7 +38,7 @@ jobs:
           python-version: '3.12'
 
       - name: Installer dépendances
-        run: pip install matplotlib pillow --quiet
+        run: pip install matplotlib pillow atproto --quiet
 
       - name: Générer og_image.jpg
         run: |
@@ -53,6 +53,21 @@ jobs:
           git add images/og_image.jpg
           git diff --cached --quiet || git commit -m "chore: og_image.jpg $(date -u +%Y-%m-%d)"
           git push
+
+      - name: Écrire credentials.json (pour post Bluesky)
+        env:
+          BSKY_C27_HANDLE:          ${{ secrets.BSKY_C27_HANDLE }}
+          BSKY_C27_APP_PASSWORD:    ${{ secrets.BSKY_C27_APP_PASSWORD }}
+        run: |
+          cat > credentials.json <<EOF
+          {
+            "handle_c27":          "$BSKY_C27_HANDLE",
+            "app_password_c27":    "$BSKY_C27_APP_PASSWORD"
+          }
+          EOF
+
+      - name: Poster l'infographie sur climat2027.bsky.social
+        run: python post_infographie_bsky.py --image images/og_image.jpg
 
       - name: Envoyer og_image.jpg sur climat2027.fr (SFTP Gandi)
         env:
