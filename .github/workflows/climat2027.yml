@@ -62,36 +62,24 @@ jobs:
         # La date de consultation est lue automatiquement depuis sources.json
         run: python generate_og.py --out images/og_image.jpg
 
-      - name: Pousser candidats.json et sources.json (API GitHub, sans git)
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Commiter candidats.json et sources.json
         run: |
-          TODAY=$(date -u +%Y-%m-%d)
-          for FILE in candidats.json sources.json CHANGES.md; do
-            [ -f "$FILE" ] || continue
-            SHA=$(gh api /repos/$GITHUB_REPOSITORY/contents/$FILE --jq .sha 2>/dev/null || true)
-            python3 - "$FILE" "$SHA" "$TODAY" <<'PYEOF'
-import base64, json, sys, subprocess
-fpath, sha, today = sys.argv[1], sys.argv[2].strip(), sys.argv[3]
-content = base64.b64encode(open(fpath, "rb").read()).decode()
-payload = {"message": f"chore: {fpath} {today}", "content": content}
-if sha:
-    payload["sha"] = sha
-p = json.dumps(payload)
-import tempfile, os
-with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
-    f.write(p)
-    tmp = f.name
-result = subprocess.run(
-    ["gh", "api", "--method", "PUT",
-     f"/repos/{os.environ['GITHUB_REPOSITORY']}/contents/{fpath}",
-     "--input", tmp, "--silent"],
-    check=True
-)
-os.unlink(tmp)
-print(f"✓ {fpath} mis à jour")
-PYEOF
-          done
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          mkdir -p /tmp/gen images
+          [ -f candidats.json ]      && cp candidats.json      /tmp/gen/ || true
+          [ -f sources.json ]        && cp sources.json        /tmp/gen/ || true
+          [ -f CHANGES.md ]          && cp CHANGES.md          /tmp/gen/ || true
+          [ -f images/og_image.jpg ] && cp images/og_image.jpg /tmp/gen/ || true
+          git fetch origin main
+          git reset --hard origin/main
+          [ -f /tmp/gen/candidats.json ]  && cp /tmp/gen/candidats.json  . || true
+          [ -f /tmp/gen/sources.json ]    && cp /tmp/gen/sources.json    . || true
+          [ -f /tmp/gen/CHANGES.md ]      && cp /tmp/gen/CHANGES.md      . || true
+          [ -f /tmp/gen/og_image.jpg ]    && cp /tmp/gen/og_image.jpg    images/ || true
+          git add candidats.json sources.json images/og_image.jpg CHANGES.md || true
+          git diff --cached --quiet || git commit -m "chore: infographie + sources $(date -u +%Y-%m-%d)"
+          git push
 
       - name: Poster l'infographie sur climat2027.bsky.social
         run: python post_infographie_bsky.py --image images/og_image.jpg
