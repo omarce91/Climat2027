@@ -66,9 +66,8 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin
-          git rebase origin/main
           git add images/og_image.jpg candidats.json sources.json CHANGES.md || true
+          git pull --rebase --autostash origin main
           git diff --cached --quiet || git commit -m "chore: infographie + sources $(date -u +%Y-%m-%d)"
           git push
 
