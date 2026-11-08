@@ -111,9 +111,6 @@ def post_to_bluesky(handle: str, app_password: str,
             models.AppBskyEmbedImages.Image(
                 alt="Infographie #Climat2027 — comparaison des programmes des candidats",
                 image=blob,
-                aspect_ratio=models.AppBskyEmbedImages.AspectRatio(
-                    width=1200, height=630
-                ),
             )
         ]
     )
