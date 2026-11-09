@@ -1,0 +1,151 @@
+{
+  "generated": "2026-11-09",
+  "transcripts_analysés": 5,
+  "total_mentions": 163,
+  "keywords_globaux": {
+    "transition énergétique": 31,
+    "nucléaire": 29,
+    "CO2 / GES": 18,
+    "biodiversité": 18,
+    "énergies renouvelables": 16,
+    "accord de Paris": 16,
+    "réchauffement climatique": 15,
+    "planification écologique": 12,
+    "agriculture / alimentation": 4,
+    "taxe carbone": 4
+  },
+  "par_parti": {
+    "ÉELV": {
+      "total": 61,
+      "keywords": {
+        "biodiversité": 14,
+        "transition énergétique": 13,
+        "accord de Paris": 9,
+        "énergies renouvelables": 8,
+        "nucléaire": 7,
+        "réchauffement climatique": 6,
+        "agriculture / alimentation": 4
+      }
+    },
+    "LFI": {
+      "total": 42,
+      "keywords": {
+        "planification écologique": 12,
+        "nucléaire": 8,
+        "énergies renouvelables": 7,
+        "CO2 / GES": 6,
+        "transition énergétique": 5,
+        "réchauffement climatique": 4
+      }
+    },
+    "Glucks.": {
+      "total": 38,
+      "keywords": {
+        "transition énergétique": 10,
+        "CO2 / GES": 8,
+        "accord de Paris": 7,
+        "réchauffement climatique": 5,
+        "taxe carbone": 4,
+        "biodiversité": 4
+      }
+    },
+    "LR": {
+      "total": 15,
+      "keywords": {
+        "nucléaire": 9,
+        "transition énergétique": 3,
+        "CO2 / GES": 2,
+        "énergies renouvelables": 1
+      }
+    },
+    "RN": {
+      "total": 7,
+      "keywords": {
+        "nucléaire": 5,
+        "CO2 / GES": 2
+      }
+    }
+  },
+  "details": [
+    {
+      "fichier": "demo_glucks.txt",
+      "date": "2026-11-02",
+      "emission": "Grand entretien",
+      "invite": "Raphaël Glucksmann",
+      "parti": "Glucks.",
+      "mots": 3100,
+      "total_mentions": 38,
+      "keywords": {
+        "transition énergétique": 10,
+        "CO2 / GES": 8,
+        "accord de Paris": 7,
+        "réchauffement climatique": 5,
+        "taxe carbone": 4,
+        "biodiversité": 4
+      }
+    },
+    {
+      "fichier": "demo_lr.txt",
+      "date": "2026-10-28",
+      "emission": "Questions politiques",
+      "invite": "Bruno Retailleau",
+      "parti": "LR",
+      "mots": 2900,
+      "total_mentions": 15,
+      "keywords": {
+        "nucléaire": 9,
+        "transition énergétique": 3,
+        "CO2 / GES": 2,
+        "énergies renouvelables": 1
+      }
+    },
+    {
+      "fichier": "demo_rn.txt",
+      "date": "2026-10-22",
+      "emission": "L'Heure politique",
+      "invite": "Jordan Bardella",
+      "parti": "RN",
+      "mots": 2500,
+      "total_mentions": 7,
+      "keywords": {
+        "nucléaire": 5,
+        "CO2 / GES": 2
+      }
+    },
+    {
+      "fichier": "demo_eelv.txt",
+      "date": "2026-10-20",
+      "emission": "Grand entretien",
+      "invite": "Marine Tondelier",
+      "parti": "ÉELV",
+      "mots": 2800,
+      "total_mentions": 61,
+      "keywords": {
+        "biodiversité": 14,
+        "transition énergétique": 13,
+        "accord de Paris": 9,
+        "énergies renouvelables": 8,
+        "nucléaire": 7,
+        "réchauffement climatique": 6,
+        "agriculture / alimentation": 4
+      }
+    },
+    {
+      "fichier": "demo_lfi.txt",
+      "date": "2026-10-15",
+      "emission": "Questions politiques",
+      "invite": "Jean-Luc Mélenchon",
+      "parti": "LFI",
+      "mots": 3200,
+      "total_mentions": 42,
+      "keywords": {
+        "planification écologique": 12,
+        "nucléaire": 8,
+        "énergies renouvelables": 7,
+        "CO2 / GES": 6,
+        "transition énergétique": 5,
+        "réchauffement climatique": 4
+      }
+    }
+  ]
+}
